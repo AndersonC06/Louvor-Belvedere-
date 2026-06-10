@@ -3,11 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, FormEvent } from 'react';
+import React, { useState, FormEvent, useEffect } from 'react';
 import { Song, Scale, Devotional, UserProfile } from '../types';
 import { 
   Users, Music, Calendar, CheckCircle, Award, BookOpen, Edit2, 
-  Check, X, Search, Plus, Phone, Sparkles, AlertCircle, Info, Heart, Smile
+  Check, X, Search, Plus, Phone, Sparkles, AlertCircle, Info, Heart, Smile,
+  Cpu, Clock, Activity, ShieldCheck, ArrowUpRight, Zap
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -34,6 +35,18 @@ export default function HomeTab({
   onResponseToScale,
   onUpdateUserRole
 }: HomeTabProps) {
+  // Clock state
+  const [currentTime, setCurrentTime] = useState('');
+  useEffect(() => {
+    const updateTime = () => {
+      const now = new Date();
+      setCurrentTime(now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
+    };
+    updateTime();
+    const timer = setInterval(updateTime, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
   // Search & filter state
   const [searchTerm, setSearchTerm] = useState('');
   const [roleFilter, setRoleFilter] = useState('Todos');
@@ -187,69 +200,105 @@ export default function HomeTab({
   return (
     <div id="home-tab-scroller" className="space-y-6 max-w-4xl mx-auto selection:bg-indigo-100 selection:text-indigo-900 pb-12">
       
-      {/* Bento Stats Grid */}
-      <div id="bento-stats" className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {/* Stat 1 */}
-        <div className="bg-white border border-slate-200 p-4 rounded-2xl shadow-sm flex items-center gap-3.5 hover:shadow-md transition">
-          <div className="p-3 bg-indigo-50 text-indigo-600 rounded-xl">
-            <Users className="h-5 w-5" />
+      {/* Dynamic Technological Operational Header */}
+      <div className="bg-slate-950 text-white rounded-3xl border border-slate-800 p-6 relative overflow-hidden shadow-2xl">
+        {/* Futuristic glowing geometric absolute details */}
+        <div className="absolute top-0 right-0 w-80 h-80 bg-indigo-600/10 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none animate-pulse" />
+        <div className="absolute bottom-0 left-1/3 w-60 h-60 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none" />
+        
+        {/* System Matrix Subline */}
+        <div className="flex flex-wrap items-center justify-between gap-4 relative z-10">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl shadow-[0_0_15px_rgba(99,102,241,0.4)] animate-pulse">
+              <Cpu className="h-5 w-5 text-indigo-50" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-mono font-bold tracking-widest text-indigo-400 uppercase bg-indigo-950/80 border border-indigo-800/60 px-2 py-0.5 rounded-md">
+                  CORE v4.0 PRO
+                </span>
+                <span className="flex items-center gap-1.5 text-[10px] font-mono text-emerald-400 font-bold bg-emerald-950/60 border border-emerald-900/60 px-2 py-0.5 rounded-md">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-ping inline-block" />
+                  SISTEMA ONLINE
+                </span>
+              </div>
+              <h1 className="text-xl font-extrabold tracking-tight mt-1 bg-gradient-to-r from-white via-slate-100 to-indigo-200 bg-clip-text text-transparent">
+                Olá, {currentUser.name}
+              </h1>
+              <p className="text-[11px] text-slate-400 font-mono tracking-wide mt-0.5">
+                Nível de Autorização: <span className="text-indigo-300 font-bold">{currentUser.role || 'Membro Técnico'}</span>
+              </p>
+            </div>
           </div>
-          <div>
-            <span className="block text-[11px] font-sans text-slate-500 uppercase tracking-wide font-medium">Equipe Ativa</span>
-            <span className="text-lg font-bold text-slate-900">{totalMembers} Membros</span>
+
+          {/* Running Clock and BRT details */}
+          <div className="flex items-center gap-4 bg-slate-900/60 border border-slate-800/80 rounded-2xl px-4 py-2.5 backdrop-blur-md">
+            <div className="text-right">
+              <span className="block text-[8px] font-mono font-bold text-indigo-400 uppercase tracking-widest">Sincronização Ativa</span>
+              <span className="block text-[15px] font-mono font-black tracking-wider text-white">
+                {currentTime || '00:00:00'}
+              </span>
+            </div>
+            <div className="p-2 bg-slate-850 rounded-lg border border-slate-750">
+              <Clock className="h-4.5 w-4.5 text-indigo-400" />
+            </div>
           </div>
         </div>
 
-        {/* Stat 2 */}
-        <div className="bg-white border border-slate-200 p-4 rounded-2xl shadow-sm flex items-center gap-3.5 hover:shadow-md transition">
-          <div className="p-3 bg-indigo-50 text-indigo-600 rounded-xl">
-            <Music className="h-5 w-5" />
+        {/* Dynamic Telemetry stats row (with scales cards removed as requested) */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6 pt-6 border-t border-slate-900 relative z-10">
+          
+          {/* Telemetry Stat 1 */}
+          <div className="bg-slate-900/40 border border-slate-850/80 p-4 rounded-2xl flex items-center justify-between hover:border-slate-800 transition group">
+            <div className="flex items-center gap-3.5">
+              <div className="p-3 bg-indigo-950/80 text-indigo-400 rounded-xl border border-indigo-900/50 group-hover:scale-105 transition">
+                <Users className="h-5 w-5" />
+              </div>
+              <div>
+                <span className="block text-[10px] font-mono text-slate-500 uppercase tracking-widest">Operadores Ativos</span>
+                <span className="text-base font-bold text-slate-100 font-mono">{totalMembers} Membros Sincronizados</span>
+              </div>
+            </div>
+            <div className="text-slate-600 hover:text-indigo-400 transition">
+              <ArrowUpRight className="h-4 w-4" />
+            </div>
           </div>
-          <div>
-            <span className="block text-[11px] font-sans text-slate-500 uppercase tracking-wide font-medium">Repertório</span>
-            <span className="text-lg font-bold text-slate-900">{totalSongs} Louvores</span>
-          </div>
-        </div>
 
-        {/* Stat 3 */}
-        <div className="bg-white border border-slate-200 p-4 rounded-2xl shadow-sm flex items-center gap-3.5 hover:shadow-md transition">
-          <div className="p-3 bg-indigo-50 text-indigo-600 rounded-xl">
-            <Calendar className="h-5 w-5" />
+          {/* Telemetry Stat 2 */}
+          <div className="bg-slate-900/40 border border-slate-850/80 p-4 rounded-2xl flex items-center justify-between hover:border-slate-800 transition group">
+            <div className="flex items-center gap-3.5">
+              <div className="p-3 bg-indigo-950/80 text-indigo-400 rounded-xl border border-indigo-900/50 group-hover:scale-105 transition">
+                <Music className="h-5 w-5" />
+              </div>
+              <div>
+                <span className="block text-[10px] font-mono text-slate-500 uppercase tracking-widest">Banco Litúrgico</span>
+                <span className="text-base font-bold text-slate-100 font-mono">{totalSongs} Louvores Catalogados</span>
+              </div>
+            </div>
+            <div className="text-slate-600 hover:text-indigo-400 transition">
+              <ArrowUpRight className="h-4 w-4" />
+            </div>
           </div>
-          <div>
-            <span className="block text-[11px] font-sans text-slate-500 uppercase tracking-wide font-medium">Escalas Ativas</span>
-            <span className="text-[13px] font-bold text-slate-900 line-clamp-1">{scaleCountText}</span>
-          </div>
-        </div>
 
-        {/* Stat 4 */}
-        <div className="bg-white border border-slate-200 p-4 rounded-2xl shadow-sm flex items-center gap-3.5 hover:shadow-md transition">
-          <div className="p-3 bg-emerald-50 text-emerald-600 rounded-xl">
-            <Award className="h-5 w-5" />
-          </div>
-          <div>
-            <span className="block text-[11px] font-sans text-slate-500 uppercase tracking-wide font-medium">Adesão Escala</span>
-            <span className="text-lg font-bold text-slate-900">{confirmationRate}</span>
-          </div>
         </div>
       </div>
 
       {/* Main Row: Duties & Devotional */}
       <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
         
-        {/* Col Left (Devotional): 7/12 width */}
+        {/* Col Left (Devotional & Members): 7/12 width */}
         <div className="md:col-span-7 space-y-6">
           
           {/* Alignment Devotional Card */}
-          <div className="bg-slate-950 text-slate-100 border border-slate-800 rounded-3xl p-6 relative overflow-hidden shadow-xl">
+          <div className="bg-gradient-to-br from-slate-900/90 to-indigo-950 border border-indigo-950 rounded-3xl p-6 relative overflow-hidden shadow-xl">
             <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
               <BookOpen className="h-32 w-32 text-indigo-500" />
             </div>
 
-            <div className="flex justify-between items-center mb-4">
+            <div className="flex justify-between items-center mb-4 relative z-10">
               <div className="flex items-center gap-2 text-indigo-400">
-                <BookOpen className="h-4 w-4" />
-                <span className="text-xs uppercase tracking-wider font-semibold">Devocional do Ministério</span>
+                <Zap className="h-4 w-4 text-amber-400 animate-pulse" />
+                <span className="text-xs uppercase tracking-widest font-mono font-bold">Painel de Alinhamento Coletivo</span>
               </div>
               
               {currentUser.isAdmin && (
@@ -260,27 +309,29 @@ export default function HomeTab({
                     setDevotText(devotional.text);
                     setShowEditDevotional(true);
                   }}
-                  className="text-xs px-2.5 py-1 rounded-lg bg-indigo-900/40 hover:bg-indigo-900/80 text-indigo-200 font-medium transition flex items-center gap-1 cursor-pointer"
+                  className="text-[10px] px-2.5 py-1.5 rounded-lg bg-indigo-900/30 hover:bg-indigo-900/70 text-indigo-200 font-bold border border-indigo-800/40 font-mono transition flex items-center gap-1 cursor-pointer"
                 >
                   <Edit2 className="h-3 w-3" />
-                  Editar
+                  EDITAR ESTUDO
                 </button>
               )}
             </div>
 
-            <h2 className="text-lg font-sans font-semibold text-white tracking-tight mb-1">
-              {devotional.title}
-            </h2>
-            <p className="text-xs italic text-indigo-300 font-medium font-mono mb-4">
-              {devotional.passage}
-            </p>
-            <p className="text-slate-300 text-xs md:text-sm leading-relaxed whitespace-pre-line">
-              {devotional.text}
-            </p>
+            <div className="relative z-10 space-y-3">
+              <h2 className="text-base font-extrabold text-white tracking-tight leading-snug">
+                {devotional.title}
+              </h2>
+              <div className="inline-block text-[10px] font-mono font-bold text-amber-400 bg-amber-950/40 border border-amber-900/35 px-2.5 py-1 rounded-md">
+                📖 {devotional.passage}
+              </div>
+              <p className="text-slate-300 text-xs md:text-sm leading-relaxed whitespace-pre-line bg-slate-950/40 p-4 rounded-xl border border-slate-900">
+                {devotional.text}
+              </p>
+            </div>
 
-            <div className="mt-4 pt-3.5 border-t border-slate-900 text-[10px] text-slate-500 flex justify-between items-center font-mono">
-              <span>Louvor Belvedere • Inspiração Semanal</span>
-              <span>Reflexão viva</span>
+            <div className="mt-5 pt-3.5 border-t border-slate-950/50 text-[9px] text-slate-500 flex justify-between items-center font-mono">
+              <span className="tracking-wide">LOUVOR BELVEDERE • INSPIRAÇÃO DIÁRIA</span>
+              <span>REFLEXÃO VATIVA</span>
             </div>
           </div>
 
@@ -291,7 +342,7 @@ export default function HomeTab({
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 selection:bg-indigo-500"
+                className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center p-4 z-50 selection:bg-indigo-500"
               >
                 <motion.div 
                   initial={{ scale: 0.95 }}
@@ -299,35 +350,38 @@ export default function HomeTab({
                   exit={{ scale: 0.95 }}
                   className="bg-slate-900 border border-slate-800 rounded-3xl p-6 max-w-md w-full shadow-2xl"
                 >
-                  <h3 className="text-base font-semibold text-white mb-4">Atualizar Estudo Devocional</h3>
+                  <h3 className="text-base font-bold text-white mb-4 flex items-center gap-2">
+                    <Edit2 className="h-4 w-4 text-indigo-400" />
+                    Atualizar Estudo Devocional
+                  </h3>
                   <form onSubmit={submitDevotionalEdit} className="space-y-4">
                     <div>
-                      <label className="block text-xs font-medium text-slate-400 mb-1">Título</label>
+                      <label className="block text-xs font-semibold text-slate-400 mb-1">Título</label>
                       <input
                         type="text"
                         value={devotTitle}
                         onChange={(e) => setDevotTitle(e.target.value)}
-                        className="w-full bg-slate-950 border border-slate-800 rounded-xl py-2 px-3 text-sm text-white"
+                        className="w-full bg-slate-950 border border-slate-800 rounded-xl py-2 px-3 text-sm text-white focus:ring-1 focus:ring-indigo-500 focus:outline-none"
                         required
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-medium text-slate-400 mb-1">Versículo Base (Passagem)</label>
+                      <label className="block text-xs font-semibold text-slate-400 mb-1">Versículo Base (Passagem)</label>
                       <input
                         type="text"
                         value={devotPassage}
                         onChange={(e) => setDevotPassage(e.target.value)}
-                        className="w-full bg-slate-950 border border-slate-800 rounded-xl py-2 px-3 text-sm text-white"
+                        className="w-full bg-slate-950 border border-slate-800 rounded-xl py-2 px-3 text-sm text-white focus:ring-1 focus:ring-indigo-500 focus:outline-none"
                         required
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-medium text-slate-400 mb-1">Mensagem Reflexiva</label>
+                      <label className="block text-xs font-semibold text-slate-400 mb-1">Mensagem Reflexiva</label>
                       <textarea
                         rows={6}
                         value={devotText}
                         onChange={(e) => setDevotText(e.target.value)}
-                        className="w-full bg-slate-950 border border-slate-800 rounded-xl py-2 px-3 text-sm text-white focus:outline-none"
+                        className="w-full bg-slate-950 border border-slate-800 rounded-xl py-2 px-3 text-sm text-white focus:ring-1 focus:ring-indigo-500 focus:outline-none"
                         required
                       />
                     </div>
@@ -335,13 +389,13 @@ export default function HomeTab({
                       <button
                         type="button"
                         onClick={() => setShowEditDevotional(false)}
-                        className="px-4 py-2 bg-slate-850 hover:bg-slate-800 text-slate-300 text-xs rounded-xl"
+                        className="px-4 py-2 bg-slate-850 hover:bg-slate-800 text-slate-300 text-xs rounded-xl transition"
                       >
                         Cancelar
                       </button>
                       <button
                         type="submit"
-                        className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-xl"
+                        className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-md transition"
                       >
                         Salvar Devocional
                       </button>
@@ -353,37 +407,40 @@ export default function HomeTab({
           </AnimatePresence>
 
           {/* Member Catalog */}
-          <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-xs">
+          <div className="bg-white border border-slate-200/90 rounded-3xl p-5 shadow-xs">
             <div className="flex justify-between items-center mb-4">
               <div>
-                <h3 className="text-sm font-semibold text-slate-900">Lista de Membros</h3>
-                <p className="text-[11px] text-slate-500">Integrantes cadastrados na equipe da Igreja Belvedere</p>
+                <h3 className="text-sm font-bold text-slate-900 tracking-tight flex items-center gap-1.5">
+                  <Users className="h-4.5 w-4.5 text-indigo-600" />
+                  Quadro de Integrantes Sincronizados
+                </h3>
+                <p className="text-[11px] text-slate-500">Membros técnicos e vocais cadastrados no sistema operacional</p>
               </div>
             </div>
 
             {/* Search and Filters */}
-            <div className="flex flex-col sm:flex-row gap-2 mb-4">
+            <div className="flex flex-col sm:flex-row gap-2.5 mb-4">
               <div className="relative flex-1">
-                <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+                <Search className="absolute left-3 top-3 h-3.5 w-3.5 text-slate-400" />
                 <input
                   type="text"
-                  placeholder="Pesquisar por nome ou papel..."
+                  placeholder="Pesquisar por nome ou instrumento..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2 pl-9 pr-4 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:bg-white"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 pl-9 pr-4 text-xs text-slate-855 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:bg-white transition"
                 />
               </div>
 
               {/* Fast Pills Selector */}
-              <div className="flex gap-1 overflow-x-auto py-1 scrollbar-none">
+              <div className="flex gap-1 overflow-x-auto py-1 scrollbar-none items-center">
                 {['Todos', 'Vocalista', 'Guitarra', 'Teclado', 'Bateria', 'Baixo'].map((r) => (
                   <button
                     key={r}
                     onClick={() => setRoleFilter(r)}
-                    className={`text-[10px] px-2.5 py-1 rounded-full border shrink-0 font-medium transition cursor-pointer ${
+                    className={`text-[10px] px-3 py-1.5 rounded-xl border shrink-0 font-bold tracking-wide transition cursor-pointer ${
                       (r === 'Todos' && roleFilter === 'Todos') || (r !== 'Todos' && roleFilter === r)
-                        ? 'bg-indigo-600 border-indigo-600 text-white'
-                        : 'bg-slate-50 border-slate-200 text-slate-600 hover:border-slate-300'
+                        ? 'bg-indigo-600 border-indigo-600 text-white shadow-xs'
+                        : 'bg-slate-50 border-slate-200 text-slate-650 hover:bg-slate-100 hover:border-slate-300'
                     }`}
                   >
                     {r}
@@ -393,64 +450,68 @@ export default function HomeTab({
             </div>
 
             {/* List with scroll */}
-            <div className="space-y-2 max-h-[290px] overflow-y-auto pr-1">
+            <div className="space-y-2.5 max-h-[310px] overflow-y-auto pr-1">
               {filteredUsers.length === 0 ? (
-                <div className="text-center py-6 text-slate-400 text-xs">
-                  Nenhum integrante encontrado com estes termos.
+                <div className="text-center py-8 text-slate-400 text-xs font-mono">
+                  NENHUM OPERADOR IDENTIFICADO COM ESTES PARÂMETROS
                 </div>
               ) : (
                 filteredUsers.map((item) => (
-                  <div key={item.id} className="flex items-center justify-between p-2 rounded-xl bg-slate-50 hover:bg-slate-100/70 border border-slate-100 transition">
-                    <div className="flex items-center gap-2.5">
+                  <div key={item.id} className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 hover:bg-slate-100/80 border border-slate-150/70 hover:shadow-2xs transition">
+                    <div className="flex items-center gap-3">
                       <img 
                         src={item.avatarUrl} 
                         alt={item.name} 
-                        className="h-8.5 w-8.5 rounded-lg bg-slate-200 border border-slate-300"
+                        className="h-9 w-9 rounded-xl bg-slate-200 border border-slate-250 p-0.5"
                         referrerPolicy="no-referrer"
                       />
                       <div>
                         <div className="flex items-center gap-1.5">
-                          <h4 className="text-xs font-semibold text-slate-900">{item.name}</h4>
+                          <h4 className="text-xs font-bold text-slate-900">{item.name}</h4>
                         </div>
-                        <span className="text-[10px] text-slate-500 block truncate max-w-[200px]">
-                          {item.roles.join(', ')}
-                        </span>
+                        <div className="flex flex-wrap items-center gap-1 mt-0.5">
+                          {item.roles.map((inst, idx) => (
+                            <span key={idx} className="text-[9px] font-mono text-indigo-700 bg-indigo-50 border border-indigo-100/50 rounded-md px-1.5 py-0.5">
+                              {inst}
+                            </span>
+                          ))}
+                        </div>
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-3 text-right">
+                    <div className="flex items-center gap-3.5 text-right shrink-0">
                       {/* Assign role dropdown (Líder only) or Role Tag */}
                       {currentUser.role === 'Líder' && item.id !== currentUser.id ? (
                         <select
                           value={item.role || 'membro'}
                           onChange={(e) => onUpdateUserRole?.(item.id, e.target.value as any)}
-                          className="text-[10px] font-semibold bg-slate-900 text-slate-200 border border-slate-700 hover:border-slate-600 rounded-lg py-1 px-1.5 cursor-pointer focus:outline-none"
+                          className="text-[10px] font-bold uppercase bg-slate-900 text-slate-200 border border-slate-800 hover:border-slate-700 rounded-xl py-1.5 px-2 cursor-pointer focus:outline-none"
                         >
                           <option value="membro">Membro</option>
                           <option value="cantor">Cantor</option>
                           <option value="Líder">Líder</option>
                         </select>
                       ) : (
-                        <span className={`text-[8px] font-bold uppercase px-1.5 py-0.5 rounded ${
-                          item.role === 'Líder' ? 'bg-indigo-100 text-indigo-700' :
-                          item.role === 'cantor' ? 'bg-emerald-100 text-emerald-700' :
-                          'bg-slate-100 text-slate-600'
+                        <span className={`text-[8px] font-mono font-bold uppercase px-2 py-0.5 rounded-md border ${
+                          item.role === 'Líder' ? 'bg-indigo-50 border-indigo-100 text-indigo-700 font-extrabold' :
+                          item.role === 'cantor' ? 'bg-emerald-50 border-emerald-100 text-emerald-700 font-extrabold' :
+                          'bg-slate-100 border-slate-200 text-slate-500'
                         }`}>
                           {item.role || 'Membro'}
                         </span>
                       )}
 
-                      <div className="text-right">
-                        <span className="block text-[10px] text-slate-500 font-mono">Bday: {item.birthdate}</span>
-                        <span className="block text-[9px] text-slate-400 font-mono">{item.phone}</span>
+                      <div className="text-right font-mono">
+                        <span className="block text-[9px] text-slate-500 font-bold">NIVER: {item.birthdate}</span>
+                        <span className="block text-[8px] text-slate-400">{item.phone}</span>
                       </div>
                       
                       <a
                         href={`https://wa.me/55${item.phone}`}
                         target="_blank"
                         rel="noreferrer"
-                        className="p-1.5 text-slate-400 hover:text-emerald-600 transition"
-                        title="Enviar Mensagem"
+                        className="p-2 bg-white hover:bg-emerald-50 border border-slate-200 hover:border-emerald-250 text-slate-600 hover:text-emerald-700 rounded-xl transition shadow-3xs"
+                        title="Enviar Mensagem WhatsApp"
                       >
                         <Phone className="h-3.5 w-3.5" />
                       </a>
@@ -466,26 +527,28 @@ export default function HomeTab({
         <div className="md:col-span-5 space-y-6">
           
           {/* Section: Your Turn Schedule */}
-          <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-xs relative">
-            <h3 className="text-sm font-semibold text-slate-900 mb-3.5 flex items-center gap-1.5">
-              <CheckCircle className="h-4.5 w-4.5 text-indigo-500" />
-              Suas Escalas Coordenadas
+          <div className="bg-slate-900 text-white border border-slate-850 rounded-3xl p-5 shadow-lg relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 rounded-full blur-2xl pointer-events-none" />
+            
+            <h3 className="text-xs font-mono font-bold uppercase tracking-widest text-indigo-400 mb-3.5 flex items-center gap-1.5 relative z-10">
+              <Activity className="h-4 w-4 text-emerald-400" />
+              Sincronia de Escalas
             </h3>
 
             {myUpcomingDuties.length === 0 ? (
-              <div className="bg-amber-50/50 border border-amber-200/60 p-4 rounded-2xl text-center space-y-2">
-                <div className="inline-flex p-2 bg-amber-50 rounded-full text-amber-500">
-                  <Smile className="h-6 w-6" />
+              <div className="bg-slate-950/60 border border-slate-800/80 p-4 rounded-2xl text-center space-y-2 relative z-10">
+                <div className="inline-flex p-2 bg-indigo-950 text-indigo-400 border border-indigo-900 rounded-xl">
+                  <ShieldCheck className="h-5 w-5" />
                 </div>
-                <h4 className="text-xs font-bold text-amber-950">Folga merecida!</h4>
-                <p className="text-[11px] text-amber-800 leading-normal max-w-xs mx-auto">
-                  {currentUser.name}, você não possui nenhuma participação agendada nos próximos cultos publicados. Aproveite para descansar ou apoiar a equipe nos ensaios voluntários!
+                <h4 className="text-xs font-bold text-slate-100">Escala Livre</h4>
+                <p className="text-[11px] text-slate-400 leading-normal max-w-xs mx-auto">
+                  {currentUser.name}, você não possui nenhuma participação ativa cadastrada nas escalas publicadas no momento.
                 </p>
               </div>
             ) : (
-              <div className="space-y-3">
-                <p className="text-[11px] text-slate-500 -mt-2 mb-3">
-                  Você foi designado para as seguintes agendas do Belvedere Louvor. Confirme sua presença:
+              <div className="space-y-3 relative z-10">
+                <p className="text-[10px] text-slate-400 -mt-2 mb-3 font-mono">
+                  Agendas litúrgicas vinculadas ao seu registro:
                 </p>
 
                 {myUpcomingDuties.map((item) => {
@@ -494,47 +557,47 @@ export default function HomeTab({
                   if (!myAlloc) return null;
 
                   return (
-                    <div key={item.id} className="p-3.5 rounded-2xl bg-indigo-50/40 border border-indigo-200/40 relative">
+                    <div key={item.id} className="p-3.5 rounded-2xl bg-slate-950 border border-slate-800/80 relative transition hover:border-slate-700">
                       <div className="flex justify-between items-start">
                         <div>
-                          <span className="text-[9px] font-mono font-bold uppercase tracking-wider text-indigo-700 bg-indigo-100 rounded-md px-1.5 py-0.5">
-                            {item.time} ({myAlloc.shift === 'both' ? '1º e 2º Culto' : `${myAlloc.shift}º Horário`})
+                          <span className="text-[8px] font-mono font-bold uppercase tracking-wider text-indigo-400 bg-indigo-950/80 border border-indigo-900/60 rounded-md px-1.5 py-0.5">
+                            {item.time} ({myAlloc.shift === 'both' ? 'Ensaios Integral' : `${myAlloc.shift}º Horário`})
                           </span>
-                          <h4 className="text-xs font-bold text-slate-950 mt-1">{item.title}</h4>
-                          <p className="text-[10px] text-slate-500 font-mono mt-0.5">Culto em: {item.date}</p>
+                          <h4 className="text-xs font-bold text-slate-150 mt-1.5">{item.title}</h4>
+                          <p className="text-[9px] text-slate-500 font-mono mt-0.5">Liturgia em: {item.date}</p>
                         </div>
 
                         {/* Status Stamp */}
-                        <span className={`text-[9px] font-bold uppercase px-2 py-0.5 rounded-full ${
-                          myAlloc.status === 'confirmed' ? 'bg-emerald-100 text-emerald-800' :
-                          myAlloc.status === 'declined' ? 'bg-red-100 text-red-800' :
-                          'bg-amber-100 text-amber-800 animate-pulse'
+                        <span className={`text-[8px] font-mono font-bold uppercase px-2 py-0.5 rounded-md border ${
+                          myAlloc.status === 'confirmed' ? 'bg-emerald-950 border-emerald-900 text-emerald-400' :
+                          myAlloc.status === 'declined' ? 'bg-red-950 border-red-900 text-red-400' :
+                          'bg-amber-950 border-amber-900 text-amber-500 animate-pulse'
                         }`}>
                           {myAlloc.status === 'confirmed' ? 'Confirmado' :
-                           myAlloc.status === 'declined' ? 'Recusado' : 'Pendente'}
+                           myAlloc.status === 'declined' ? 'Ausente' : 'Pendente'}
                         </span>
                       </div>
 
-                      <div className="mt-2 text-[11px] text-slate-600">
-                        Atuação técnica: <strong className="text-slate-800">{myAlloc.role}</strong>
+                      <div className="mt-2 text-[10px] text-slate-400 font-mono">
+                        Atuação Técnica: <strong className="text-indigo-300 font-bold">{myAlloc.role}</strong>
                       </div>
 
                       {/* Confirm/Decline Immediate Actions */}
                       {myAlloc.status === 'pending' && (
-                        <div className="flex gap-2 mt-3 pt-2.5 border-t border-indigo-200/30">
+                        <div className="flex gap-2 mt-3 pt-2.5 border-t border-slate-800/60">
                           <button
                             onClick={() => onResponseToScale(item.id, 'declined')}
-                            className="flex-1 bg-red-50 hover:bg-red-100 text-red-700 text-[10px] font-semibold py-1 rounded-lg flex items-center justify-center gap-1 cursor-pointer transition border border-red-200/50"
+                            className="flex-1 bg-red-950/40 hover:bg-red-900/30 text-red-400 text-[10px] font-semibold py-1.5 rounded-lg flex items-center justify-center gap-1 cursor-pointer transition border border-red-900/25"
                           >
                             <X className="h-3 w-3" />
-                            Recusar Turno
+                            Recusar
                           </button>
                           <button
                             onClick={() => onResponseToScale(item.id, 'confirmed')}
-                            className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-bold py-1 rounded-lg flex items-center justify-center gap-1 cursor-pointer transition"
+                            className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-bold py-1.5 rounded-lg flex items-center justify-center gap-1 cursor-pointer transition shadow-md"
                           >
                             <Check className="h-3 w-3" />
-                            Confirmar Apoio
+                            Confirmar
                           </button>
                         </div>
                       )}
@@ -546,9 +609,9 @@ export default function HomeTab({
           </div>
 
           {/* General Belvedere Information Block */}
-          <div className="bg-slate-50 border border-slate-200 rounded-3xl p-4.5 text-xs text-slate-600 space-y-2 relative shadow-xs hover:shadow-md transition">
-            <div className="flex justify-between items-center">
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Ajuda e Informações</span>
+          <div className="bg-white border border-slate-200 rounded-3xl p-4.5 text-xs text-slate-650 space-y-2 relative shadow-xs hover:shadow-md transition">
+            <div className="flex justify-between items-center bg-slate-50 -mx-4.5 -mt-4.5 p-3 px-4.5 rounded-t-3xl border-b border-slate-150">
+              <span className="text-[9px] font-mono font-bold text-slate-500 uppercase tracking-widest block">Diretrizes & Protocolos</span>
               {currentUser.isAdmin && (
                 <button
                   type="button"
@@ -556,16 +619,16 @@ export default function HomeTab({
                     setEditedHelpText(devotional.helpText || 'Os ensaios regulares acontecem aos sábados, às 16h00 no templo Belvedere. Se precisar de substituto, notifique a liderança no mural de recados até a terça-feira anterior.');
                     setShowEditHelpText(true);
                   }}
-                  className="text-[10px] font-semibold text-indigo-650 hover:text-indigo-800 flex items-center gap-0.5 cursor-pointer"
+                  className="text-[9px] font-bold text-indigo-650 hover:text-indigo-800 flex items-center gap-0.5 cursor-pointer font-mono uppercase"
                 >
-                  <Edit2 className="h-3 w-3" />
-                  Editar
+                  <Edit2 className="h-2.5 w-2.5" />
+                  EDITAR DIRETRIZES
                 </button>
               )}
             </div>
-            <div className="flex gap-2.5">
-              <Info className="h-4 w-4 text-indigo-500 shrink-0 mt-0.5" />
-              <p className="whitespace-pre-line text-[11px] leading-relaxed">
+            <div className="flex gap-3 pt-1">
+              <Info className="h-4.5 w-4.5 text-indigo-500 shrink-0 mt-0.5" />
+              <p className="whitespace-pre-line text-[11px] leading-relaxed text-slate-600">
                 {devotional.helpText || 'Os ensaios regulares acontecem aos sábados, às 16h00 no templo Belvedere. Se precisar de substituto, notifique a liderança no mural de recados até a terça-feira anterior.'}
               </p>
             </div>
@@ -577,22 +640,22 @@ export default function HomeTab({
               <Sparkles className="h-6 w-6 text-indigo-400" />
             </div>
 
-            <div className="mb-3">
-              <h3 className="text-sm font-semibold text-slate-900 flex items-center gap-1">
+            <div className="mb-3.5">
+              <h3 className="text-sm font-bold text-slate-900 flex items-center gap-1.5">
                 <Heart className="h-4.5 w-4.5 text-indigo-500 fill-indigo-200" />
-                Aniversariantes de {currentMonthName}
+                Aniversariantes • {currentMonthName}
               </h3>
-              <p className="text-[11px] text-slate-500">Mande um abraço no WhatsApp dos nossos músicos!</p>
+              <p className="text-[11px] text-slate-500">Mande um testemunho de bênção aos nossos aniversariantes!</p>
             </div>
 
             {birthdayKids.length === 0 ? (
-              <div className="text-center py-4 text-xs text-slate-400">
-                Nenhum membro faz aniversário neste mês.
+              <div className="text-center py-5 text-xs text-slate-405 font-mono">
+                NENHUM INSTRUMENTISTA FAZ ANIVERSÁRIO EM {currentMonthName.toUpperCase()}
               </div>
             ) : (
               <div className="space-y-2.5">
                 {birthdayKids.map((kid) => (
-                  <div key={kid.id} className="flex items-center justify-between p-2.5 rounded-2xl bg-indigo-50/20 border border-indigo-200/10">
+                  <div key={kid.id} className="flex items-center justify-between p-2.5 rounded-2xl bg-indigo-50/30 border border-indigo-100/30">
                     <div className="flex items-center gap-2">
                        <img 
                         src={kid.avatarUrl} 
@@ -610,7 +673,7 @@ export default function HomeTab({
                       href={getWhatsAppLink(kid)}
                       target="_blank"
                       rel="noreferrer"
-                      className="px-2.5 py-1 text-[10px] bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg flex items-center gap-1 shadow-sm transition"
+                      className="px-3 py-1.5 text-[10px] bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl flex items-center gap-1 shadow-sm transition"
                     >
                       <Plus className="h-3 w-3" />
                       Parabéns
@@ -636,10 +699,10 @@ export default function HomeTab({
                   exit={{ scale: 0.95 }}
                   className="bg-slate-900 border border-slate-800 rounded-3xl p-6 max-w-md w-full shadow-2xl"
                 >
-                  <h3 className="text-base font-semibold text-white mb-4">Editar Ajuda e Informações</h3>
+                  <h3 className="text-base font-bold text-white mb-4">Editar Ajuda e Informações</h3>
                   <form onSubmit={submitHelpTextEdit} className="space-y-4">
                     <div>
-                      <label className="block text-xs font-medium text-slate-400 mb-1">Dicas e Avisos do Ministério</label>
+                      <label className="block text-xs font-semibold text-slate-400 mb-1">Dicas e Avisos do Ministério</label>
                       <textarea
                         rows={5}
                         value={editedHelpText}
@@ -650,7 +713,7 @@ export default function HomeTab({
                       />
                     </div>
                     <div className="flex justify-end gap-3 pt-2">
-                      <button
+                       <button
                         type="button"
                         onClick={() => setShowEditHelpText(false)}
                         className="px-4 py-2 bg-slate-850 hover:bg-slate-800 text-slate-300 text-xs rounded-xl"
@@ -659,7 +722,7 @@ export default function HomeTab({
                       </button>
                       <button
                         type="submit"
-                        className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-xl"
+                        className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl"
                       >
                         Salvar Informações
                       </button>
