@@ -1,0 +1,8 @@
+{
+  "name": "Louvor-Belvedere 139",
+  "description": "App de auxilio do louvor da IEADAM 139 Belvedere",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

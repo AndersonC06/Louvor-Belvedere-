@@ -1,0 +1,110 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "User profile with role, birthdate, instrument, phone, and optional avatar.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "email": { "type": "string" },
+        "avatarUrl": { "type": "string" },
+        "roles": { "type": "array" },
+        "birthdate": { "type": "string" },
+        "phone": { "type": "string" },
+        "role": { "type": "string", "enum": ["membro", "cantor", "Líder"] },
+        "isAdmin": { "type": "boolean" }
+      },
+      "required": ["id", "name", "email", "birthdate"]
+    },
+    "Song": {
+      "title": "Song",
+      "description": "Repretoire song.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "artist": { "type": "string" },
+        "category": { "type": "string" },
+        "tone": { "type": "string" },
+        "bpm": { "type": "number" },
+        "lyricsUrl": { "type": "string" },
+        "chordsUrl": { "type": "string" },
+        "audioUrl": { "type": "string" },
+        "videoUrl": { "type": "string" },
+        "observations": { "type": "string" },
+        "versions": { "type": "array" }
+      },
+      "required": ["id", "title", "artist", "tone"]
+    },
+    "Scale": {
+      "title": "Scale",
+      "description": "Worship service schedule and band line-up.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "date": { "type": "string" },
+        "time": { "type": "string" },
+        "songIds": { "type": "array" },
+        "participants": { "type": "array" },
+        "status": { "type": "string", "enum": ["draft", "published"] },
+        "scaleType": { "type": "string" },
+        "songLeaders": { "type": "object" },
+        "songNotes": { "type": "object" },
+        "songSlot": { "type": "object" },
+        "playlistUrl": { "type": "string" }
+      },
+      "required": ["id", "title", "date", "status"]
+    },
+    "Message": {
+      "title": "Message",
+      "description": "Mural board chat message.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "senderId": { "type": "string" },
+        "senderName": { "type": "string" },
+        "senderAvatar": { "type": "string" },
+        "text": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "senderId", "senderName", "text", "createdAt"]
+    },
+    "Devotional": {
+      "title": "Devotional",
+      "description": "Devotional of the week.",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "passage": { "type": "string" },
+        "text": { "type": "string" },
+        "lastUpdated": { "type": "string" }
+      },
+      "required": ["title", "text"]
+    }
+  },
+  "firestore": {
+    "users/{userId}": {
+      "schema": "UserProfile",
+      "description": "Registered worship band members profiles indexed by auth UID"
+    },
+    "songs/{songId}": {
+      "schema": "Song",
+      "description": "Ministerial repertoire of songs"
+    },
+    "scales/{scaleId}": {
+      "schema": "Scale",
+      "description": "Culto team schedules and details"
+    },
+    "messages/{messageId}": {
+      "schema": "Message",
+      "description": "Chat board message announcements"
+    },
+    "devotionals/{id}": {
+      "schema": "Devotional",
+      "description": "Weekly devotional reflection piece"
+    }
+  }
+}

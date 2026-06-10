@@ -1,0 +1,22 @@
+{
+  "name": "Louvor Belvedere",
+  "short_name": "Belvedere Louvor",
+  "description": "Sistema completo para gestão de escalas, repertório de louvores e equipe ministerial da Igreja Belvedere.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#090d16",
+  "theme_color": "#4f46e5",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "https://api.dicebear.com/7.x/shapes/png?seed=belvedere-music&backgroundColor=4f46e5",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://api.dicebear.com/7.x/shapes/png?seed=belvedere-music&backgroundColor=4f46e5",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

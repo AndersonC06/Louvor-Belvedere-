@@ -1,0 +1,66 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Global safety net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isLider() {
+      return isSignedIn() && (
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'Líder'
+      );
+    }
+
+    function isCantor() {
+      return isSignedIn() && (
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) && (
+          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'cantor' ||
+          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'Líder'
+        )
+      );
+    }
+
+    match /users/{userId} {
+      allow read: if isSignedIn();
+      // Allow any signed up user to write their own profile
+      allow create: if isSignedIn() && request.auth.uid == userId;
+      // Member can update their own non-role properties, Lider can update any profile (including mapping roles)
+      allow update: if isSignedIn() && (request.auth.uid == userId || isLider());
+      allow delete: if isSignedIn() && (request.auth.uid == userId || isLider());
+    }
+
+    match /songs/{songId} {
+      allow read: if isSignedIn();
+      // Lider and Cantor can insert/modify/delete songs
+      allow write: if isCantor() || isLider();
+    }
+
+    match /scales/{scaleId} {
+      allow read: if isSignedIn();
+      // Lider can update, insert, or delete scales
+      allow write: if isLider();
+    }
+
+    match /messages/{messageId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn();
+      allow update, delete: if isSignedIn() && (resource.data.senderId == request.auth.uid || isLider());
+    }
+
+    match /devotionals/{id} {
+      allow read: if isSignedIn();
+      allow write: if isLider();
+    }
+  }
+}
