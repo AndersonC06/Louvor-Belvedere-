@@ -50,6 +50,8 @@ export default function HomeTab({
   // Search & filter state
   const [searchTerm, setSearchTerm] = useState('');
   const [roleFilter, setRoleFilter] = useState('Todos');
+  const [showMembersList, setShowMembersList] = useState(false);
+  const [showRoleFilters, setShowRoleFilters] = useState(false);
 
   // Add Member State
   const [showAddMember, setShowAddMember] = useState(false);
@@ -200,82 +202,81 @@ export default function HomeTab({
   return (
     <div id="home-tab-scroller" className="space-y-6 max-w-4xl mx-auto selection:bg-indigo-100 selection:text-indigo-900 pb-12">
       
-      {/* Dynamic Technological Operational Header */}
-      <div className="bg-slate-950 text-white rounded-3xl border border-slate-800 p-6 relative overflow-hidden shadow-2xl">
-        {/* Futuristic glowing geometric absolute details */}
-        <div className="absolute top-0 right-0 w-80 h-80 bg-indigo-600/10 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none animate-pulse" />
-        <div className="absolute bottom-0 left-1/3 w-60 h-60 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none" />
+      {/* Dynamic Congregational praise and worship header */}
+      <div className="bg-gradient-to-br from-amber-50/90 via-rose-50/20 to-indigo-50/60 text-slate-850 rounded-3xl border border-amber-200/50 p-6 relative overflow-hidden shadow-sm">
+        {/* Soft elegant glowing background accents */}
+        <div className="absolute top-0 right-0 w-72 h-72 bg-amber-200/20 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none" />
+        <div className="absolute bottom-0 left-1/4 w-60 h-60 bg-rose-200/20 rounded-full blur-3xl pointer-events-none" />
         
-        {/* System Matrix Subline */}
         <div className="flex flex-wrap items-center justify-between gap-4 relative z-10">
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl shadow-[0_0_15px_rgba(99,102,241,0.4)] animate-pulse">
-              <Cpu className="h-5 w-5 text-indigo-50" />
+          <div className="flex items-center gap-3.5">
+            <div className="p-3 bg-gradient-to-br from-amber-400 to-rose-400 text-white rounded-2xl shadow-xs flex items-center justify-center">
+              <Sparkles className="h-5.5 w-5.5" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-[10px] font-mono font-bold tracking-widest text-indigo-400 uppercase bg-indigo-950/80 border border-indigo-800/60 px-2 py-0.5 rounded-md">
-                  CORE v4.0 PRO
+                <span className="text-[10px] font-sans font-bold tracking-wider text-amber-800 uppercase bg-amber-100/70 border border-amber-200/60 px-2.5 py-0.5 rounded-full inline-flex items-center gap-1.5">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  Comunhão Ativa
                 </span>
-                <span className="flex items-center gap-1.5 text-[10px] font-mono text-emerald-400 font-bold bg-emerald-950/60 border border-emerald-900/60 px-2 py-0.5 rounded-md">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-ping inline-block" />
-                  SISTEMA ONLINE
+                <span className="text-[10px] font-sans font-bold text-indigo-850 bg-indigo-50/80 border border-indigo-100/55 px-2.5 py-0.5 rounded-full">
+                  Belvedere Louvor
                 </span>
               </div>
-              <h1 className="text-xl font-extrabold tracking-tight mt-1 bg-gradient-to-r from-white via-slate-100 to-indigo-200 bg-clip-text text-transparent">
+              <h1 className="text-xl font-extrabold tracking-tight mt-1 text-slate-900">
                 Olá, {currentUser.name}
               </h1>
-              <p className="text-[11px] text-slate-400 font-mono tracking-wide mt-0.5">
-                Nível de Autorização: <span className="text-indigo-300 font-bold">{currentUser.role || 'Membro Técnico'}</span>
+              <p className="text-xs text-slate-500 italic mt-0.5">
+                "Servi ao Senhor com alegria, apresentai-vos a Ele com cânticos." — Salmo 100:2
               </p>
             </div>
           </div>
 
-          {/* Running Clock and BRT details */}
-          <div className="flex items-center gap-4 bg-slate-900/60 border border-slate-800/80 rounded-2xl px-4 py-2.5 backdrop-blur-md">
+          {/* Elegant Worship Clock / Date Badge */}
+          <div className="flex items-center gap-3.5 bg-white/80 border border-slate-200 rounded-2xl px-4 py-2.5 shadow-3xs backdrop-blur-md">
             <div className="text-right">
-              <span className="block text-[8px] font-mono font-bold text-indigo-400 uppercase tracking-widest">Sincronização Ativa</span>
-              <span className="block text-[15px] font-mono font-black tracking-wider text-white">
+              <span className="block text-[8px] font-mono font-bold text-slate-400 uppercase tracking-widest">Sintonia Litúrgica</span>
+              <span className="block text-[14px] font-mono font-black text-slate-800 tracking-wider">
                 {currentTime || '00:00:00'}
               </span>
             </div>
-            <div className="p-2 bg-slate-850 rounded-lg border border-slate-750">
-              <Clock className="h-4.5 w-4.5 text-indigo-400" />
+            <div className="p-2.5 bg-amber-50/60 border border-amber-100 text-amber-600 rounded-xl">
+              <Clock className="h-4 w-4" />
             </div>
           </div>
         </div>
 
-        {/* Dynamic Telemetry stats row (with scales cards removed as requested) */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6 pt-6 border-t border-slate-900 relative z-10">
+        {/* Dynamic Congregational Stats Row */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6 pt-5 border-t border-slate-200/50 relative z-10">
           
-          {/* Telemetry Stat 1 */}
-          <div className="bg-slate-900/40 border border-slate-850/80 p-4 rounded-2xl flex items-center justify-between hover:border-slate-800 transition group">
+          {/* Stat 1: Worship Leaders/Musicians */}
+          <div className="bg-white/70 border border-slate-200/60 p-4 rounded-2xl flex items-center justify-between hover:border-slate-300 transition group hover:shadow-3xs">
             <div className="flex items-center gap-3.5">
-              <div className="p-3 bg-indigo-950/80 text-indigo-400 rounded-xl border border-indigo-900/50 group-hover:scale-105 transition">
-                <Users className="h-5 w-5" />
+              <div className="p-3 bg-indigo-50 text-indigo-600 rounded-xl border border-indigo-100/50 group-hover:scale-105 transition">
+                <Users className="h-4.5 w-4.5" />
               </div>
               <div>
-                <span className="block text-[10px] font-mono text-slate-500 uppercase tracking-widest">Operadores Ativos</span>
-                <span className="text-base font-bold text-slate-100 font-mono">{totalMembers} Membros Sincronizados</span>
+                <span className="block text-[10px] text-slate-400 font-extrabold uppercase tracking-wider">Músicos Integrados</span>
+                <span className="text-sm font-extrabold text-slate-800">{totalMembers} Adoradores em Comunhão</span>
               </div>
             </div>
-            <div className="text-slate-600 hover:text-indigo-400 transition">
+            <div className="text-slate-400 group-hover:text-indigo-600 transition">
               <ArrowUpRight className="h-4 w-4" />
             </div>
           </div>
 
-          {/* Telemetry Stat 2 */}
-          <div className="bg-slate-900/40 border border-slate-850/80 p-4 rounded-2xl flex items-center justify-between hover:border-slate-800 transition group">
+          {/* Stat 2: Worship Directory / Songs */}
+          <div className="bg-white/70 border border-slate-200/60 p-4 rounded-2xl flex items-center justify-between hover:border-slate-300 transition group hover:shadow-3xs">
             <div className="flex items-center gap-3.5">
-              <div className="p-3 bg-indigo-950/80 text-indigo-400 rounded-xl border border-indigo-900/50 group-hover:scale-105 transition">
-                <Music className="h-5 w-5" />
+              <div className="p-3 bg-amber-50 text-amber-700 rounded-xl border border-amber-100/50 group-hover:scale-105 transition">
+                <Music className="h-4.5 w-4.5" />
               </div>
               <div>
-                <span className="block text-[10px] font-mono text-slate-500 uppercase tracking-widest">Banco Litúrgico</span>
-                <span className="text-base font-bold text-slate-100 font-mono">{totalSongs} Louvores Catalogados</span>
+                <span className="block text-[10px] text-slate-400 font-extrabold uppercase tracking-wider">Repertório de Louvor</span>
+                <span className="text-sm font-extrabold text-slate-800">{totalSongs} Cânticos Catalogados</span>
               </div>
             </div>
-            <div className="text-slate-600 hover:text-indigo-400 transition">
+            <div className="text-slate-400 group-hover:text-amber-600 transition">
               <ArrowUpRight className="h-4 w-4" />
             </div>
           </div>
@@ -290,48 +291,45 @@ export default function HomeTab({
         <div className="md:col-span-7 space-y-6">
           
           {/* Alignment Devotional Card */}
-          <div className="bg-gradient-to-br from-slate-900/90 to-indigo-950 border border-indigo-950 rounded-3xl p-6 relative overflow-hidden shadow-xl">
-            <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
-              <BookOpen className="h-32 w-32 text-indigo-500" />
+          <div className="bg-gradient-to-br from-indigo-50/80 via-white to-amber-50/20 border border-slate-250/70 rounded-3xl p-6 relative overflow-hidden shadow-xs hover:shadow-md transition">
+            <div className="absolute top-0 right-0 p-4 opacity-[0.03] pointer-events-none">
+              <BookOpen className="h-32 w-32 text-indigo-900" />
             </div>
 
             <div className="flex justify-between items-center mb-4 relative z-10">
-              <div className="flex items-center gap-2 text-indigo-400">
-                <Zap className="h-4 w-4 text-amber-400 animate-pulse" />
-                <span className="text-xs uppercase tracking-widest font-mono font-bold">Painel de Alinhamento Coletivo</span>
+              <div className="flex items-center gap-2 text-indigo-650">
+                <BookOpen className="h-4.5 w-4.5 text-indigo-500" />
+                <span className="text-xs uppercase tracking-wider font-sans font-extrabold">Devocional</span>
               </div>
               
               {currentUser.isAdmin && (
                 <button
                   onClick={() => {
                     setDevotTitle(devotional.title);
-                    setDevotPassage(devotional.passage);
+                    setDevotPassage(devotional.passage || '');
                     setDevotText(devotional.text);
                     setShowEditDevotional(true);
                   }}
-                  className="text-[10px] px-2.5 py-1.5 rounded-lg bg-indigo-900/30 hover:bg-indigo-900/70 text-indigo-200 font-bold border border-indigo-800/40 font-mono transition flex items-center gap-1 cursor-pointer"
+                  className="text-[10px] px-3 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-705 font-bold border border-indigo-100 font-sans transition flex items-center gap-1 cursor-pointer shadow-3xs"
                 >
                   <Edit2 className="h-3 w-3" />
-                  EDITAR ESTUDO
+                  EDITAR DEVOCIONAL
                 </button>
               )}
             </div>
 
             <div className="relative z-10 space-y-3">
-              <h2 className="text-base font-extrabold text-white tracking-tight leading-snug">
+              <h2 className="text-lg font-black text-slate-900 tracking-tight leading-snug">
                 {devotional.title}
               </h2>
-              <div className="inline-block text-[10px] font-mono font-bold text-amber-400 bg-amber-950/40 border border-amber-900/35 px-2.5 py-1 rounded-md">
-                📖 {devotional.passage}
-              </div>
-              <p className="text-slate-300 text-xs md:text-sm leading-relaxed whitespace-pre-line bg-slate-950/40 p-4 rounded-xl border border-slate-900">
+              <p className="text-slate-700 text-xs md:text-sm leading-relaxed whitespace-pre-line bg-white/70 p-4 rounded-2xl border border-slate-150/80 shadow-3xs">
                 {devotional.text}
               </p>
             </div>
 
-            <div className="mt-5 pt-3.5 border-t border-slate-950/50 text-[9px] text-slate-500 flex justify-between items-center font-mono">
+            <div className="mt-5 pt-3.5 border-t border-slate-100 text-[9px] text-slate-400 flex justify-between items-center font-mono">
               <span className="tracking-wide">LOUVOR BELVEDERE • INSPIRAÇÃO DIÁRIA</span>
-              <span>REFLEXÃO VATIVA</span>
+              <span>MEDITAÇÃO DA EQUIPE</span>
             </div>
           </div>
 
@@ -407,119 +405,168 @@ export default function HomeTab({
           </AnimatePresence>
 
           {/* Member Catalog */}
-          <div className="bg-white border border-slate-200/90 rounded-3xl p-5 shadow-xs">
-            <div className="flex justify-between items-center mb-4">
+          <div className="bg-white border border-slate-200/90 rounded-3xl p-5 shadow-sm transition-transform duration-200">
+            <div 
+              className="flex justify-between items-center cursor-pointer select-none"
+              onClick={() => setShowMembersList(!showMembersList)}
+            >
               <div>
                 <h3 className="text-sm font-bold text-slate-900 tracking-tight flex items-center gap-1.5">
                   <Users className="h-4.5 w-4.5 text-indigo-600" />
                   Quadro de Integrantes Sincronizados
                 </h3>
-                <p className="text-[11px] text-slate-500">Membros técnicos e vocais cadastrados no sistema operacional</p>
+                <p className="text-[11px] text-slate-500">Clique para {showMembersList ? 'recolher' : 'visualizar os membros cadastrados'}</p>
+              </div>
+              <div className="p-1 px-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-[11px] text-indigo-700 font-extrabold flex items-center gap-1.5 transition">
+                {showMembersList ? 'Ocultar' : 'Expandir'}
+                <motion.span
+                  animate={{ rotate: showMembersList ? 180 : 0 }}
+                  className="inline-block"
+                >
+                  ▼
+                </motion.span>
               </div>
             </div>
 
-            {/* Search and Filters */}
-            <div className="flex flex-col sm:flex-row gap-2.5 mb-4">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-3 h-3.5 w-3.5 text-slate-400" />
-                <input
-                  type="text"
-                  placeholder="Pesquisar por nome ou instrumento..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 pl-9 pr-4 text-xs text-slate-855 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:bg-white transition"
-                />
-              </div>
-
-              {/* Fast Pills Selector */}
-              <div className="flex gap-1 overflow-x-auto py-1 scrollbar-none items-center">
-                {['Todos', 'Vocalista', 'Guitarra', 'Teclado', 'Bateria', 'Baixo'].map((r) => (
-                  <button
-                    key={r}
-                    onClick={() => setRoleFilter(r)}
-                    className={`text-[10px] px-3 py-1.5 rounded-xl border shrink-0 font-bold tracking-wide transition cursor-pointer ${
-                      (r === 'Todos' && roleFilter === 'Todos') || (r !== 'Todos' && roleFilter === r)
-                        ? 'bg-indigo-600 border-indigo-600 text-white shadow-xs'
-                        : 'bg-slate-50 border-slate-200 text-slate-650 hover:bg-slate-100 hover:border-slate-300'
-                    }`}
-                  >
-                    {r}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* List with scroll */}
-            <div className="space-y-2.5 max-h-[310px] overflow-y-auto pr-1">
-              {filteredUsers.length === 0 ? (
-                <div className="text-center py-8 text-slate-400 text-xs font-mono">
-                  NENHUM OPERADOR IDENTIFICADO COM ESTES PARÂMETROS
-                </div>
-              ) : (
-                filteredUsers.map((item) => (
-                  <div key={item.id} className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 hover:bg-slate-100/80 border border-slate-150/70 hover:shadow-2xs transition">
-                    <div className="flex items-center gap-3">
-                      <img 
-                        src={item.avatarUrl} 
-                        alt={item.name} 
-                        className="h-9 w-9 rounded-xl bg-slate-200 border border-slate-250 p-0.5"
-                        referrerPolicy="no-referrer"
-                      />
-                      <div>
-                        <div className="flex items-center gap-1.5">
-                          <h4 className="text-xs font-bold text-slate-900">{item.name}</h4>
-                        </div>
-                        <div className="flex flex-wrap items-center gap-1 mt-0.5">
-                          {item.roles.map((inst, idx) => (
-                            <span key={idx} className="text-[9px] font-mono text-indigo-700 bg-indigo-50 border border-indigo-100/50 rounded-md px-1.5 py-0.5">
-                              {inst}
-                            </span>
-                          ))}
-                        </div>
+            {/* Collapsible Content */}
+            <AnimatePresence initial={false}>
+              {showMembersList && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  className="overflow-hidden mt-4 pt-4 border-t border-slate-100"
+                >
+                  {/* Search and Filters */}
+                  <div className="flex flex-col gap-2.5 mb-4">
+                    <div className="flex items-center gap-2">
+                      <div className="relative flex-1">
+                        <Search className="absolute left-3 top-3 h-3.5 w-3.5 text-slate-400" />
+                        <input
+                          type="text"
+                          placeholder="Pesquisar por nome ou instrumento..."
+                          value={searchTerm}
+                          onChange={(e) => setSearchTerm(e.target.value)}
+                          className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2 pl-9 pr-4 text-xs text-slate-850 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:bg-white transition"
+                        />
                       </div>
-                    </div>
 
-                    <div className="flex items-center gap-3.5 text-right shrink-0">
-                      {/* Assign role dropdown (Líder only) or Role Tag */}
-                      {currentUser.role === 'Líder' && item.id !== currentUser.id ? (
-                        <select
-                          value={item.role || 'membro'}
-                          onChange={(e) => onUpdateUserRole?.(item.id, e.target.value as any)}
-                          className="text-[10px] font-bold uppercase bg-slate-900 text-slate-200 border border-slate-800 hover:border-slate-700 rounded-xl py-1.5 px-2 cursor-pointer focus:outline-none"
-                        >
-                          <option value="membro">Membro</option>
-                          <option value="cantor">Cantor</option>
-                          <option value="Líder">Líder</option>
-                        </select>
-                      ) : (
-                        <span className={`text-[8px] font-mono font-bold uppercase px-2 py-0.5 rounded-md border ${
-                          item.role === 'Líder' ? 'bg-indigo-50 border-indigo-100 text-indigo-700 font-extrabold' :
-                          item.role === 'cantor' ? 'bg-emerald-50 border-emerald-100 text-emerald-700 font-extrabold' :
-                          'bg-slate-100 border-slate-200 text-slate-500'
-                        }`}>
-                          {item.role || 'Membro'}
-                        </span>
-                      )}
-
-                      <div className="text-right font-mono">
-                        <span className="block text-[9px] text-slate-500 font-bold">NIVER: {item.birthdate}</span>
-                        <span className="block text-[8px] text-slate-400">{item.phone}</span>
-                      </div>
-                      
-                      <a
-                        href={`https://wa.me/55${item.phone}`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="p-2 bg-white hover:bg-emerald-50 border border-slate-200 hover:border-emerald-250 text-slate-600 hover:text-emerald-700 rounded-xl transition shadow-3xs"
-                        title="Enviar Mensagem WhatsApp"
+                      {/* Toggle Roles Filter Button */}
+                      <button
+                        type="button"
+                        onClick={() => setShowRoleFilters(!showRoleFilters)}
+                        className={`text-xs px-3 py-2 rounded-xl border flex items-center gap-1.5 font-bold transition cursor-pointer ${
+                          showRoleFilters 
+                            ? 'bg-amber-100 border-amber-250 text-amber-800' 
+                            : 'bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-650'
+                        }`}
                       >
-                        <Phone className="h-3.5 w-3.5" />
-                      </a>
+                        🌟 {showRoleFilters ? 'Ocultar Filtros' : 'Filtrar Funções'}
+                      </button>
                     </div>
+
+                    {/* Collapsible Role filter pills */}
+                    <AnimatePresence>
+                      {showRoleFilters && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: 'auto' }}
+                          exit={{ opacity: 0, height: 0 }}
+                          className="flex gap-1 overflow-x-auto py-1.5 scrollbar-none items-center"
+                        >
+                          {['Todos', 'Vocalista', 'Guitarra', 'Teclado', 'Bateria', 'Baixo'].map((r) => (
+                            <button
+                              key={r}
+                              type="button"
+                              onClick={() => setRoleFilter(r)}
+                              className={`text-[10px] px-3 py-1.5 rounded-xl border shrink-0 font-bold tracking-wide transition cursor-pointer ${
+                                (r === 'Todos' && roleFilter === 'Todos') || (r !== 'Todos' && roleFilter === r)
+                                  ? 'bg-indigo-600 border-indigo-600 text-white shadow-xs'
+                                  : 'bg-slate-50 border-slate-200 text-slate-650 hover:bg-slate-100 hover:border-slate-300'
+                              }`}
+                            >
+                              {r}
+                            </button>
+                          ))}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </div>
-                ))
+
+                  {/* List with scroll */}
+                  <div className="space-y-2.5 max-h-[310px] overflow-y-auto pr-1">
+                    {filteredUsers.length === 0 ? (
+                      <div className="text-center py-8 text-slate-400 text-xs font-mono">
+                        NENHUM OPERADOR IDENTIFICADO COM ESTES PARÂMETROS
+                      </div>
+                    ) : (
+                      filteredUsers.map((item) => (
+                        <div key={item.id} className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 hover:bg-slate-100/80 border border-slate-150/70 hover:shadow-2xs transition">
+                          <div className="flex items-center gap-3">
+                            <img 
+                              src={item.avatarUrl} 
+                              alt={item.name} 
+                              className="h-9 w-9 rounded-xl bg-slate-200 border border-slate-250 p-0.5"
+                              referrerPolicy="no-referrer"
+                            />
+                            <div>
+                              <div className="flex items-center gap-1.5">
+                                <h4 className="text-xs font-bold text-slate-900">{item.name}</h4>
+                              </div>
+                              <div className="flex flex-wrap items-center gap-1 mt-0.5">
+                                {item.roles.map((inst, idx) => (
+                                  <span key={idx} className="text-[9px] font-mono text-indigo-700 bg-indigo-50 border border-indigo-100/50 rounded-md px-1.5 py-0.5">
+                                    {inst}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-3 text-right shrink-0">
+                            {/* Assign role dropdown (Líder only) or Role Tag */}
+                            {currentUser.role === 'Líder' && item.id !== currentUser.id ? (
+                              <select
+                                value={item.role || 'membro'}
+                                onChange={(e) => onUpdateUserRole?.(item.id, e.target.value as any)}
+                                className="text-[10px] font-bold uppercase bg-slate-900 text-slate-200 border border-slate-800 hover:border-slate-700 rounded-xl py-1.5 px-2 cursor-pointer focus:outline-none"
+                              >
+                                <option value="membro">Membro</option>
+                                <option value="cantor">Cantor</option>
+                                <option value="Líder">Líder</option>
+                              </select>
+                            ) : (
+                              <span className={`text-[8px] font-mono font-bold uppercase px-2 py-0.5 rounded-md border ${
+                                item.role === 'Líder' ? 'bg-indigo-50 border-indigo-100 text-indigo-700 font-extrabold' :
+                                item.role === 'cantor' ? 'bg-emerald-50 border-emerald-100 text-emerald-700 font-extrabold' :
+                                'bg-slate-100 border-slate-200 text-slate-500'
+                              }`}>
+                                {item.role || 'Membro'}
+                              </span>
+                            )}
+
+                            <div className="text-right font-mono text-[9px] hidden sm:block">
+                              <span className="block text-slate-500 font-bold">NIVER: {item.birthdate}</span>
+                              <span className="block text-slate-400">{item.phone}</span>
+                            </div>
+                            
+                            <a
+                              href={`https://wa.me/55${item.phone}`}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="p-2 bg-white hover:bg-emerald-50 border border-slate-200 hover:border-emerald-250 text-slate-600 hover:text-emerald-700 rounded-xl transition shadow-3xs"
+                              title="Enviar Mensagem WhatsApp"
+                            >
+                              <Phone className="h-3.5 w-3.5" />
+                            </a>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </motion.div>
               )}
-            </div>
+            </AnimatePresence>
           </div>
         </div>
 
