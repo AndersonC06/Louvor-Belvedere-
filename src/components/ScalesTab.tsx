@@ -7,9 +7,11 @@ import React, { useState, FormEvent } from 'react';
 import { Scale, Song, ScaleParticipant, UserProfile } from '../types';
 import { 
   Calendar, Clock, Music, User, Trash2, Plus, Search, 
-  X, Check, ExternalLink, MessageSquare, Play, Sparkles, Filter, AlertTriangle
+  X, Check, ExternalLink, MessageSquare, Play, Sparkles, Filter, AlertTriangle,
+  Download, Image
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { toPng } from 'html-to-image';
 
 interface ScalesTabProps {
   currentUser: UserProfile;
@@ -35,6 +37,41 @@ export default function ScalesTab({
   
   // Selection scale for Detailed Modal
   const [inspectedScale, setInspectedScale] = useState<Scale | null>(null);
+
+  // Image exporting states & ref
+  const [isExporting, setIsExporting] = useState(false);
+  const exportRef = React.useRef<HTMLDivElement>(null);
+
+  const handleExportImage = async () => {
+    if (!exportRef.current || !inspectedScale) return;
+    setIsExporting(true);
+    try {
+      // 350ms to allow layouts to settle
+      await new Promise((resolve) => setTimeout(resolve, 350));
+      
+      const dataUrl = await toPng(exportRef.current, {
+        backgroundColor: '#ffffff',
+        width: 600,
+        style: {
+          transform: 'scale(1)',
+          borderRadius: '0px',
+        },
+        cacheBust: true,
+      });
+
+      const cleanTitle = inspectedScale.title.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+      const fileName = `escala_${cleanTitle || 'louvor'}_${inspectedScale.date}.png`;
+      const link = document.createElement('a');
+      link.download = fileName;
+      link.href = dataUrl;
+      link.click();
+    } catch (error) {
+      console.error('Erro ao exportar escala em imagem:', error);
+      alert('Não foi possível gerar a imagem da escala automaticamente. Tente fazer um print manual ou tente novamente.');
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   // Keep inspectedScale in sync with latest scales prop
   React.useEffect(() => {
@@ -1125,28 +1162,50 @@ export default function ScalesTab({
                   );
                 })()}
 
-                {/* Administrative parameters */}
-                {currentUser.isAdmin && (
-                  <div className="flex gap-2 pt-2.5 sm:pt-0 w-full sm:w-auto border-t sm:border-t-0 border-slate-200">
+                {/* Administrative and Export parameters */}
+                {(currentUser.role === 'Líder' || currentUser.isAdmin) && (
+                  <div className="flex gap-2 pt-2.5 sm:pt-0 w-full sm:w-auto border-t sm:border-t-0 border-slate-200 flex-wrap sm:flex-nowrap shrink-0">
                     <button
-                      onClick={() => toggleScaleStatus(inspectedScale)}
-                      className="flex-1 text-slate-700 bg-slate-200 hover:bg-slate-300 px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition flex items-center justify-center gap-1"
+                      onClick={handleExportImage}
+                      disabled={isExporting}
+                      className="flex-grow sm:flex-none px-3.5 py-1.5 text-white bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 font-bold rounded-lg text-xs cursor-pointer transition flex items-center justify-center gap-1.5 shadow-xs"
                     >
-                      {inspectedScale.status === 'published' ? 'Despublicar (Rascunho)' : 'Publicar Escala'}
+                      {isExporting ? (
+                        <>
+                          <span className="animate-spin h-3.5 w-3.5 border-2 border-white border-t-transparent rounded-full" />
+                          <span>Gerando...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Download className="h-3.5 w-3.5" />
+                          <span>Exportar Imagem</span>
+                        </>
+                      )}
                     </button>
-                    
-                    <button
-                      onClick={() => {
-                        if (confirm('Tem certeza de que deseja deletar a escala "' + inspectedScale.title + '"?')) {
-                          onDeleteScale(inspectedScale.id);
-                          setInspectedScale(null);
-                        }
-                      }}
-                      className="p-1.5 text-red-500 hover:bg-red-50 hover:text-red-700 transition rounded-lg border border-red-200/50 cursor-pointer"
-                      title="Deletar escala"
-                    >
-                      <Trash2 className="h-4.5 w-4.5" />
-                    </button>
+
+                    {currentUser.isAdmin && (
+                      <>
+                        <button
+                          onClick={() => toggleScaleStatus(inspectedScale)}
+                          className="flex-1 text-slate-700 bg-slate-200 hover:bg-slate-300 px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition flex items-center justify-center gap-1"
+                        >
+                          {inspectedScale.status === 'published' ? 'Despublicar (Rascunho)' : 'Publicar Escala'}
+                        </button>
+                        
+                        <button
+                          onClick={() => {
+                            if (confirm('Tem certeza de que deseja deletar a escala "' + inspectedScale.title + '"?')) {
+                              onDeleteScale(inspectedScale.id);
+                              setInspectedScale(null);
+                            }
+                          }}
+                          className="p-1.5 text-red-500 hover:bg-red-50 hover:text-red-700 transition rounded-lg border border-red-200/50 cursor-pointer flex items-center justify-center"
+                          title="Deletar escala"
+                        >
+                          <Trash2 className="h-4.5 w-4.5" />
+                        </button>
+                      </>
+                    )}
                   </div>
                 )}
 
@@ -1157,6 +1216,220 @@ export default function ScalesTab({
         )}
       </AnimatePresence>
 
+      {/* Hidden Export Card for html-to-image */}
+      <div 
+        style={{ position: 'absolute', top: '-9999px', left: '-9999px', width: '600px', overflow: 'hidden' }}
+      >
+        <div 
+          ref={exportRef}
+          className="bg-white p-6 rounded-3xl border border-slate-200 flex flex-col font-sans"
+          style={{ width: '600px' }}
+        >
+          {/* Header */}
+          <div className="bg-gradient-to-r from-indigo-700 to-indigo-950 p-6 rounded-2xl text-white shadow-md">
+            <div className="flex justify-between items-center bg-indigo-900/40 px-3 py-1 rounded-lg w-max mb-3 border border-indigo-550/20">
+              <span className="text-[10px] font-bold font-mono uppercase tracking-widest text-indigo-200">
+                {inspectedScale?.scaleType || 'Escala'}
+              </span>
+            </div>
+            
+            <h1 className="text-xl font-extrabold tracking-tight leading-snug">
+              {inspectedScale?.title || 'Escala de Louvor'}
+            </h1>
+            
+            {inspectedScale?.description && (
+              <p className="text-xs text-indigo-100/95 font-medium mt-1 leading-relaxed">
+                Obs: {inspectedScale.description}
+              </p>
+            )}
+
+            <div className="mt-4 pt-3.5 border-t border-indigo-600/40 grid grid-cols-2 gap-4 text-xs font-medium text-indigo-105">
+              <div className="flex items-center gap-1.5">
+                <Calendar className="h-4 w-4 text-indigo-300" />
+                <span>{inspectedScale ? formatDateBR(inspectedScale.date) : ''}</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <Clock className="h-4 w-4 text-indigo-300" />
+                <span>{inspectedScale?.time || ''}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Content */}
+          <div className="mt-6 space-y-6">
+            {/* Setlist */}
+            <div>
+              <h2 className="text-xs font-black uppercase text-slate-450 tracking-wider flex items-center gap-1.5 mb-3 border-b pb-1.5 border-slate-150">
+                <Music className="h-3.5 w-3.5 text-indigo-600" />
+                Setlist Planejado ({inspectedScale?.songIds.length || 0} Canções)
+              </h2>
+
+              <div className="space-y-3">
+                {!inspectedScale || inspectedScale.songIds.length === 0 ? (
+                  <p className="text-xs text-slate-400 italic">Nenhum louvor no setlist.</p>
+                ) : (
+                  (['celebração', 'oferta', 'adoração'] as const).map(slotKey => {
+                    const slotSongs = inspectedScale.songIds.filter(songId => inspectedScale.songSlot?.[songId] === slotKey);
+                    if (slotSongs.length === 0) return null;
+
+                    return (
+                      <div key={slotKey} className="border border-indigo-50/50 bg-indigo-50/10 rounded-xl p-3 space-y-2">
+                        <h3 className="text-[9px] font-black uppercase tracking-widest text-indigo-700 mb-1.5">
+                          {slotKey === 'celebração' ? '⚡ CELEBRAÇÃO (Louvor Alegre)' :
+                           slotKey === 'oferta' ? '🪙 OFERTA (Dízimos / Avisos)' :
+                           '🙏 ADORAÇÃO (Cânticos e Ministração)'}
+                        </h3>
+
+                        <div className="space-y-1.5">
+                          {slotSongs.map(songId => {
+                            const sObj = songs.find(s => s.id === songId);
+                            if (!sObj) return null;
+
+                            const leadText = inspectedScale.songLeaders?.[songId];
+                            const songNote = inspectedScale.songNotes?.[songId];
+
+                            return (
+                              <div key={songId} className="flex flex-col p-2 bg-white rounded-lg border border-slate-100 shadow-2xs">
+                                <div className="flex justify-between items-center gap-2">
+                                  <div>
+                                    <span className="text-xs font-bold text-slate-900">{sObj.title}</span>
+                                    <span className="text-[10px] text-slate-500 block">Autoria: {sObj.artist}</span>
+                                  </div>
+                                  <span className="text-[10px] font-mono font-black bg-indigo-50 text-indigo-700 px-1.5 py-0.5 rounded">
+                                    Tom: {sObj.tone}
+                                  </span>
+                                </div>
+                                {leadText && (
+                                  <span className="text-[9px] text-indigo-600 font-bold mt-1">
+                                    Solista: <span className="underline">{leadText}</span>
+                                  </span>
+                                )}
+                                {songNote && (
+                                  <span className="text-[9px] text-slate-500 italic mt-0.5">
+                                    💡 Obs: {songNote}
+                                  </span>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            </div>
+
+            {/* Musicians */}
+            <div>
+              <h2 className="text-xs font-black uppercase text-slate-450 tracking-wider flex items-center gap-1.5 mb-3 border-b pb-1.5 border-slate-150">
+                <User className="h-3.5 w-3.5 text-indigo-600" />
+                Equipe Escalada (Coordenados)
+              </h2>
+
+              <div className="grid grid-cols-2 gap-4">
+                {/* 1º Horário */}
+                <div className="border border-slate-100 rounded-xl p-3 bg-slate-50/50">
+                  <span className="text-[9px] font-black uppercase tracking-wider text-indigo-800 bg-indigo-100/60 px-2 py-0.5 rounded mb-2.5 inline-block">
+                    1º Horário
+                  </span>
+                  {!inspectedScale || inspectedScale.participants.filter(p => p.shift === '1' || p.shift === 'both').length === 0 ? (
+                    <p className="text-[10px] text-slate-400 italic">Vazio</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {inspectedScale.participants.filter(p => p.shift === '1' || p.shift === 'both').map(cell => (
+                        <div key={cell.userId} className="flex items-center justify-between p-1.5 rounded-lg bg-white border border-slate-100 shadow-3xs">
+                          <div className="flex items-center gap-2">
+                            <div className={`h-6 w-6 rounded-full flex items-center justify-center text-[9px] font-black uppercase shrink-0 ${getAvatarColorClass(cell.userId)}`}>
+                              {getInitials(cell.name)}
+                            </div>
+                            <div className="leading-tight">
+                              <h6 className="text-[10px] font-extrabold text-slate-900 truncate max-w-[80px]">{cell.name}</h6>
+                              <span className="text-[8px] text-slate-500 block truncate max-w-[80px]">{cell.role}</span>
+                            </div>
+                          </div>
+                          <span className={`text-[8px] font-bold uppercase px-1 py-0.5 rounded leading-none ${
+                            cell.status === 'confirmed' ? 'bg-emerald-100 text-emerald-800' :
+                            cell.status === 'declined' ? 'bg-red-100 text-red-800' :
+                            'bg-amber-100 text-amber-800'
+                          }`}>
+                            {cell.status === 'confirmed' ? 'Confirmado' : cell.status === 'declined' ? 'Ausente' : 'Pendente'}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* 2º Horário */}
+                <div className="border border-slate-100 rounded-xl p-3 bg-slate-50/50">
+                  <span className="text-[9px] font-black uppercase tracking-wider text-indigo-800 bg-indigo-100/60 px-2 py-0.5 rounded mb-2.5 inline-block">
+                    2º Horário
+                  </span>
+                  {!inspectedScale || inspectedScale.participants.filter(p => p.shift === '2' || p.shift === 'both').length === 0 ? (
+                    <p className="text-[10px] text-slate-400 italic">Vazio</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {inspectedScale.participants.filter(p => p.shift === '2' || p.shift === 'both').map(cell => (
+                        <div key={cell.userId} className="flex items-center justify-between p-1.5 rounded-lg bg-white border border-slate-100 shadow-3xs">
+                          <div className="flex items-center gap-2">
+                            <div className={`h-6 w-6 rounded-full flex items-center justify-center text-[9px] font-black uppercase shrink-0 ${getAvatarColorClass(cell.userId)}`}>
+                              {getInitials(cell.name)}
+                            </div>
+                            <div className="leading-tight">
+                              <h6 className="text-[10px] font-extrabold text-slate-900 truncate max-w-[80px]">{cell.name}</h6>
+                              <span className="text-[8px] text-slate-500 block truncate max-w-[80px]">{cell.role}</span>
+                            </div>
+                          </div>
+                          <span className={`text-[8px] font-bold uppercase px-1 py-0.5 rounded leading-none ${
+                            cell.status === 'confirmed' ? 'bg-emerald-100 text-emerald-800' :
+                            cell.status === 'declined' ? 'bg-red-100 text-red-800' :
+                            'bg-amber-100 text-amber-800'
+                          }`}>
+                            {cell.status === 'confirmed' ? 'Confirmado' : cell.status === 'declined' ? 'Ausente' : 'Pendente'}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Footer Brand */}
+          <div className="mt-8 pt-4 border-t border-slate-150 flex items-center justify-between text-[9px] text-slate-400 font-bold uppercase tracking-wider font-mono">
+            <span>© Louvor Belvedere IEADAM 139</span>
+            <span>Escala Eletrônica</span>
+          </div>
+        </div>
+      </div>
+
     </div>
   );
+}
+
+const AVATAR_COLORS = [
+  'bg-indigo-500 text-white',
+  'bg-emerald-500 text-white',
+  'bg-sky-500 text-white',
+  'bg-amber-500 text-white',
+  'bg-fuchsia-500 text-white',
+  'bg-rose-500 text-white',
+  'bg-teal-500 text-white',
+];
+
+function getAvatarColorClass(userId: string) {
+  let sum = 0;
+  for (let i = 0; i < userId.length; i++) {
+    sum += userId.charCodeAt(i);
+  }
+  return AVATAR_COLORS[sum % AVATAR_COLORS.length];
+}
+
+function getInitials(name: string) {
+  if (!name) return "";
+  const parts = name.trim().split(/\s+/);
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 }
