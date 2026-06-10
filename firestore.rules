@@ -48,8 +48,16 @@ service cloud.firestore {
 
     match /scales/{scaleId} {
       allow read: if isSignedIn();
-      // Lider can update, insert, or delete scales
-      allow write: if isLider();
+      // Lider can create, update, or delete scales. Registered participants can update their attendance status.
+      allow create, delete: if isLider();
+      allow update: if isLider() || (
+        isSignedIn() &&
+        request.resource.data.id == resource.data.id &&
+        request.resource.data.title == resource.data.title &&
+        request.resource.data.date == resource.data.date &&
+        request.resource.data.status == resource.data.status &&
+        request.resource.data.participants.size() == resource.data.participants.size()
+      );
     }
 
     match /messages/{messageId} {
