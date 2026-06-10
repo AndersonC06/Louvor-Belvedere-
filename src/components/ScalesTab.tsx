@@ -52,6 +52,7 @@ export default function ScalesTab({
       const dataUrl = await toPng(exportRef.current, {
         backgroundColor: '#ffffff',
         width: 600,
+        pixelRatio: 3, // Multiplies resolution by 3x for ultra-sharp High-DPI quality
         style: {
           transform: 'scale(1)',
           borderRadius: '0px',
@@ -102,10 +103,18 @@ export default function ScalesTab({
   const [creatorSongNotes, setCreatorSongNotes] = useState<Record<string, string>>({});
   const [creatorSongSlot, setCreatorSongSlot] = useState<Record<string, string>>({});
 
-  // Participants creation state
-  const [creatorParticipants, setCreatorParticipants] = useState<ScaleParticipant[]>([]);
+  // Participants creation state (retaining flat array for consistency, but managed via templates)
+  const [slotBaterista, setSlotBaterista] = useState<{ userId: string; shift: '1' | '2' | 'both' }>({ userId: '', shift: 'both' });
+  const [slotTecladista, setSlotTecladista] = useState<{ userId: string; shift: '1' | '2' | 'both' }>({ userId: '', shift: 'both' });
+  const [slotGuitarrista, setSlotGuitarrista] = useState<{ userId: string; shift: '1' | '2' | 'both' }>({ userId: '', shift: 'both' });
+  const [slotBaixista, setSlotBaixista] = useState<{ userId: string; shift: '1' | '2' | 'both' }>({ userId: '', shift: 'both' });
+  const [slotCantor1, setSlotCantor1] = useState<{ userId: string; shift: '1' | '2' | 'both' }>({ userId: '', shift: 'both' });
+  const [slotCantor2, setSlotCantor2] = useState<{ userId: string; shift: '1' | '2' | 'both' }>({ userId: '', shift: 'both' });
+  const [slotCantor3, setSlotCantor3] = useState<{ userId: string; shift: '1' | '2' | 'both' }>({ userId: '', shift: 'both' });
+  const [slotViolao, setSlotViolao] = useState<{ userId: string; shift: '1' | '2' | 'both' }>({ userId: '', shift: 'both' });
+  const [creatorExtraParticipants, setCreatorExtraParticipants] = useState<ScaleParticipant[]>([]);
   
-  // Helper for adding participant to creator scale
+  // Helper for adding extra participant to creator scale
   const [pSelectUser, setPSelectUser] = useState('');
   const [pSelectRole, setPSelectRole] = useState('Vocalista');
   const [pSelectShift, setPSelectShift] = useState<'1' | '2' | 'both'>('both');
@@ -140,14 +149,14 @@ export default function ScalesTab({
     setCreatorSongSlot(copySlots);
   };
 
-  const addParticipantToCreatorList = () => {
+  const addExtraParticipantToCreatorList = () => {
     if (!pSelectUser) return;
     const matchedProfile = users.find(u => u.id === pSelectUser);
     if (!matchedProfile) return;
 
-    // Check pre-existence
-    if (creatorParticipants.some(p => p.userId === pSelectUser)) {
-      alert('Este integrante já foi escalado para esse culto!');
+    // Check pre-existence in extras
+    if (creatorExtraParticipants.some(p => p.userId === pSelectUser)) {
+      alert('Este integrante extra já foi escalado!');
       return;
     }
 
@@ -155,17 +164,63 @@ export default function ScalesTab({
       userId: pSelectUser,
       name: matchedProfile.name,
       avatarUrl: matchedProfile.avatarUrl,
-      role: pSelectRole,
-      status: 'pending',
+      role: pSelectRole || 'Extra',
+      status: 'confirmed',
       shift: pSelectShift
     };
 
-    setCreatorParticipants([...creatorParticipants, nParticipant]);
+    setCreatorExtraParticipants([...creatorExtraParticipants, nParticipant]);
     setPSelectUser('');
+    setPSelectRole('Vocalista');
   };
 
-  const removeParticipantFromCreatorList = (userId: string) => {
-    setCreatorParticipants(creatorParticipants.filter(p => p.userId !== userId));
+  const removeExtraParticipantFromCreatorList = (userId: string) => {
+    setCreatorExtraParticipants(creatorExtraParticipants.filter(p => p.userId !== userId));
+  };
+
+  const batchLinkSlotsToShift = (shift: '1' | '2' | 'both') => {
+    const slotsToMigrate = [
+      { uState: slotBaterista, role: 'Baterista', setter: setSlotBaterista },
+      { uState: slotTecladista, role: 'Tecladista', setter: setSlotTecladista },
+      { uState: slotGuitarrista, role: 'Guitarrista', setter: setSlotGuitarrista },
+      { uState: slotBaixista, role: 'Baixista', setter: setSlotBaixista },
+      { uState: slotCantor1, role: 'Cantor 1', setter: setSlotCantor1 },
+      { uState: slotCantor2, role: 'Cantor 2', setter: setSlotCantor2 },
+      { uState: slotCantor3, role: 'Cantor 3', setter: setSlotCantor3 },
+      { uState: slotViolao, role: 'Violão', setter: setSlotViolao },
+    ];
+
+    const newExtras: ScaleParticipant[] = [...creatorExtraParticipants];
+    let migratedCount = 0;
+
+    slotsToMigrate.forEach(({ uState, role, setter }) => {
+      if (uState.userId) {
+        const matchedProfile = users.find(u => u.id === uState.userId);
+        if (matchedProfile) {
+          const alreadyExists = newExtras.some(
+            e => e.userId === uState.userId && e.role === role && e.shift === shift
+          );
+          if (!alreadyExists) {
+            newExtras.push({
+              userId: uState.userId,
+              name: matchedProfile.name,
+              avatarUrl: matchedProfile.avatarUrl,
+              role: role,
+              status: 'confirmed',
+              shift: shift
+            });
+            migratedCount++;
+          }
+          setter({ userId: '', shift: 'both' });
+        }
+      }
+    });
+
+    if (migratedCount > 0) {
+      setCreatorExtraParticipants(newExtras);
+    } else {
+      alert('Selecione pelo menos um integrante nos campos acima antes de vincular!');
+    }
   };
 
   const handleStartEditScale = (scale: Scale) => {
@@ -180,7 +235,77 @@ export default function ScalesTab({
     setCreatorSongLeaders(scale.songLeaders || {});
     setCreatorSongNotes(scale.songNotes || {});
     setCreatorSongSlot(scale.songSlot || {});
-    setCreatorParticipants(scale.participants || []);
+    
+    // Load and map participants into dedicated template slots
+    const parts = scale.participants || [];
+    const assignedIds = new Set<string>();
+
+    const bPart = parts.find(p => p.role === 'Baterista' || p.role.toLowerCase() === 'bateria');
+    if (bPart) {
+      setSlotBaterista({ userId: bPart.userId, shift: bPart.shift });
+      assignedIds.add(bPart.userId);
+    } else {
+      setSlotBaterista({ userId: '', shift: 'both' });
+    }
+
+    const tPart = parts.find(p => !assignedIds.has(p.userId) && (p.role === 'Tecladista' || p.role.toLowerCase() === 'teclado' || p.role.toLowerCase() === 'piano'));
+    if (tPart) {
+      setSlotTecladista({ userId: tPart.userId, shift: tPart.shift });
+      assignedIds.add(tPart.userId);
+    } else {
+      setSlotTecladista({ userId: '', shift: 'both' });
+    }
+
+    const gPart = parts.find(p => !assignedIds.has(p.userId) && (p.role === 'Guitarrista' || p.role.toLowerCase() === 'guitarra' || p.role.toLowerCase() === 'violão' || p.role.toLowerCase() === 'violao'));
+    if (gPart) {
+      setSlotGuitarrista({ userId: gPart.userId, shift: gPart.shift });
+      assignedIds.add(gPart.userId);
+    } else {
+      setSlotGuitarrista({ userId: '', shift: 'both' });
+    }
+
+    const baPart = parts.find(p => !assignedIds.has(p.userId) && (p.role === 'Baixista' || p.role.toLowerCase() === 'baixo'));
+    if (baPart) {
+      setSlotBaixista({ userId: baPart.userId, shift: baPart.shift });
+      assignedIds.add(baPart.userId);
+    } else {
+      setSlotBaixista({ userId: '', shift: 'both' });
+    }
+
+    const vocalParts = parts.filter(p => !assignedIds.has(p.userId) && (p.role.includes('Cantor') || p.role.toLowerCase().includes('vocal') || p.role.toLowerCase().includes('voz') || p.role.toLowerCase().includes('ministro') || p.role.toLowerCase().includes('back')));
+
+    if (vocalParts[0]) {
+      setSlotCantor1({ userId: vocalParts[0].userId, shift: vocalParts[0].shift });
+      assignedIds.add(vocalParts[0].userId);
+    } else {
+      setSlotCantor1({ userId: '', shift: 'both' });
+    }
+
+    if (vocalParts[1]) {
+      setSlotCantor2({ userId: vocalParts[1].userId, shift: vocalParts[1].shift });
+      assignedIds.add(vocalParts[1].userId);
+    } else {
+      setSlotCantor2({ userId: '', shift: 'both' });
+    }
+
+    if (vocalParts[2]) {
+      setSlotCantor3({ userId: vocalParts[2].userId, shift: vocalParts[2].shift });
+      assignedIds.add(vocalParts[2].userId);
+    } else {
+      setSlotCantor3({ userId: '', shift: 'both' });
+    }
+
+    const vPart = parts.find(p => !assignedIds.has(p.userId) && (p.role === 'Violonista' || p.role === 'Violão' || p.role.toLowerCase() === 'violão' || p.role.toLowerCase() === 'violao'));
+    if (vPart) {
+      setSlotViolao({ userId: vPart.userId, shift: vPart.shift });
+      assignedIds.add(vPart.userId);
+    } else {
+      setSlotViolao({ userId: '', shift: 'both' });
+    }
+
+    const extras = parts.filter(p => !assignedIds.has(p.userId));
+    setCreatorExtraParticipants(extras);
+
     setIsCreatingScale(true);
     // Scroll up smoothly
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -193,8 +318,40 @@ export default function ScalesTab({
       return;
     }
 
+    // Build the final participants array
+    const finalParticipants: ScaleParticipant[] = [];
+
+    const addSlot = (uState: { userId: string; shift: '1' | '2' | 'both' }, roleName: string) => {
+      if (!uState.userId) return;
+      const matchedProfile = users.find(u => u.id === uState.userId);
+      if (!matchedProfile) return;
+      finalParticipants.push({
+        userId: uState.userId,
+        name: matchedProfile.name,
+        avatarUrl: matchedProfile.avatarUrl,
+        role: roleName,
+        status: 'confirmed', // forced confirmed to eliminate friction
+        shift: uState.shift
+      });
+    };
+
+    addSlot(slotBaterista, 'Baterista');
+    addSlot(slotTecladista, 'Tecladista');
+    addSlot(slotGuitarrista, 'Guitarrista');
+    addSlot(slotBaixista, 'Baixista');
+    addSlot(slotCantor1, 'Cantor 1');
+    addSlot(slotCantor2, 'Cantor 2');
+    addSlot(slotCantor3, 'Cantor 3');
+    addSlot(slotViolao, 'Violão');
+
+    creatorExtraParticipants.forEach(cp => {
+      finalParticipants.push({
+        ...cp,
+        status: 'confirmed'
+      });
+    });
+
     if (editingScaleId) {
-      const existingScale = scales.find(s => s.id === editingScaleId);
       const scaleObj: Scale = {
         id: editingScaleId,
         title: scaleTitle,
@@ -208,11 +365,7 @@ export default function ScalesTab({
         songLeaders: creatorSongLeaders,
         songNotes: creatorSongNotes,
         songSlot: creatorSongSlot,
-        participants: creatorParticipants.map(cp => {
-          // Keep response status from the pre-existing participants if they exist
-          const matchedEx = existingScale?.participants.find(p => p.userId === cp.userId);
-          return matchedEx ? { ...cp, status: matchedEx.status } : cp;
-        })
+        participants: finalParticipants
       };
 
       onUpdateScale(scaleObj);
@@ -233,7 +386,7 @@ export default function ScalesTab({
         songLeaders: creatorSongLeaders,
         songNotes: creatorSongNotes,
         songSlot: creatorSongSlot,
-        participants: creatorParticipants
+        participants: finalParticipants
       };
 
       onAddScale(scaleObj);
@@ -251,7 +404,15 @@ export default function ScalesTab({
     setCreatorSongLeaders({});
     setCreatorSongNotes({});
     setCreatorSongSlot({});
-    setCreatorParticipants([]);
+    setSlotBaterista({ userId: '', shift: 'both' });
+    setSlotTecladista({ userId: '', shift: 'both' });
+    setSlotGuitarrista({ userId: '', shift: 'both' });
+    setSlotBaixista({ userId: '', shift: 'both' });
+    setSlotCantor1({ userId: '', shift: 'both' });
+    setSlotCantor2({ userId: '', shift: 'both' });
+    setSlotCantor3({ userId: '', shift: 'both' });
+    setSlotViolao({ userId: '', shift: 'both' });
+    setCreatorExtraParticipants([]);
     setIsCreatingScale(false);
   };
 
@@ -547,95 +708,370 @@ export default function ScalesTab({
             </div>
 
             {/* Seção 2: Alocação de Equipe */}
-            <div className="border border-slate-100 p-4 rounded-2xl bg-indigo-50/20 space-y-3.5">
-              <h5 className="text-xs font-bold text-indigo-950 uppercase tracking-wider flex items-center gap-1">
-                <User className="h-3.5 w-3.5 text-indigo-505" />
-                Músicos e Cantores Escalados
+            <div className="border border-slate-100 p-4 md:p-5 rounded-2xl bg-indigo-50/20 space-y-4">
+              <h5 className="text-xs font-bold text-indigo-950 uppercase tracking-wider flex items-center gap-1.5 border-b border-indigo-100/40 pb-2">
+                <User className="h-4 w-4 text-indigo-600" />
+                Montagem da Escala Fixa Obrigatória
               </h5>
 
-              {/* Add form row */}
-              <div className="grid grid-cols-1 sm:grid-cols-12 gap-2 bg-white p-2.5 rounded-xl border border-slate-100 items-end">
-                <div className="sm:col-span-5">
-                  <label className="block text-[9px] font-bold uppercase text-slate-500 mb-1">Selecionar Integrante</label>
-                  <select
-                    value={pSelectUser}
-                    onChange={(e) => setPSelectUser(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-lg p-1.5 text-xs focus:bg-white"
-                  >
-                    <option value="">Escolher da equipe...</option>
-                    {users.map(u => (
-                      <option key={u.id} value={u.id}>{u.name}</option>
-                    ))}
-                  </select>
+              <p className="text-[11px] text-slate-500 leading-normal">
+                Selecione os integrantes obrigatórios para cada uma das posições fixas da escala. Ao clicar em cada campo, apenas os instrumentistas ou cantores com a respectiva qualificação cadastrada no perfil aparecerão.
+              </p>
+
+              {/* Grid of the 7 fixed spots */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                
+                {/* Baterista */}
+                <div className="bg-white p-3 rounded-xl border border-slate-150 flex flex-col sm:flex-row sm:items-center justify-between gap-2 shadow-3xs">
+                  <div className="flex-1">
+                    <label className="block text-[10px] font-extrabold uppercase text-indigo-700 mb-1">⚡ Baterista (Fixo)</label>
+                    <select
+                      value={slotBaterista.userId}
+                      onChange={(e) => setSlotBaterista({ ...slotBaterista, userId: e.target.value })}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-lg p-1.5 text-xs font-medium focus:bg-white focus:ring-1 focus:ring-indigo-500"
+                    >
+                      <option value="">(Vazio - Sem Baterista)</option>
+                      {users.filter(u => u.roles.some(r => r.toLowerCase().includes('bater'))).map(u => (
+                        <option key={u.id} value={u.id}>{u.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="w-full sm:w-[110px] shrink-0">
+                    <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1">Turno</label>
+                    <select
+                      value={slotBaterista.shift}
+                      onChange={(e) => setSlotBaterista({ ...slotBaterista, shift: e.target.value as any })}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-lg p-1.5 text-xs text-slate-600"
+                    >
+                      <option value="both">Ambos</option>
+                      <option value="1">1º Horário</option>
+                      <option value="2">2º Horário</option>
+                    </select>
+                  </div>
                 </div>
 
-                <div className="sm:col-span-4">
-                  <label className="block text-[9px] font-bold uppercase text-slate-500 mb-1">Qualificação / Atuação no Culto</label>
-                  <input
-                    type="text"
-                    placeholder="Bateria, Vocal, Baixo..."
-                    value={pSelectRole}
-                    onChange={(e) => setPSelectRole(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-lg p-1.5 text-xs focus:bg-white"
-                  />
+                {/* Tecladista */}
+                <div className="bg-white p-3 rounded-xl border border-slate-150 flex flex-col sm:flex-row sm:items-center justify-between gap-2 shadow-3xs">
+                  <div className="flex-1">
+                    <label className="block text-[10px] font-extrabold uppercase text-indigo-700 mb-1">🎹 Tecladista (Fixo)</label>
+                    <select
+                      value={slotTecladista.userId}
+                      onChange={(e) => setSlotTecladista({ ...slotTecladista, userId: e.target.value })}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-lg p-1.5 text-xs font-medium focus:bg-white focus:ring-1 focus:ring-indigo-500"
+                    >
+                      <option value="">(Vazio - Sem Tecladista)</option>
+                      {users.filter(u => u.roles.some(r => r.toLowerCase().includes('teclad') || r.toLowerCase().includes('piano'))).map(u => (
+                        <option key={u.id} value={u.id}>{u.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="w-full sm:w-[110px] shrink-0">
+                    <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1">Turno</label>
+                    <select
+                      value={slotTecladista.shift}
+                      onChange={(e) => setSlotTecladista({ ...slotTecladista, shift: e.target.value as any })}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-lg p-1.5 text-xs text-slate-600"
+                    >
+                      <option value="both">Ambos</option>
+                      <option value="1">1º Horário</option>
+                      <option value="2">2º Horário</option>
+                    </select>
+                  </div>
                 </div>
 
-                <div className="sm:col-span-2">
-                  <label className="block text-[9px] font-bold uppercase text-slate-500 mb-1">Turno de Serviço</label>
-                  <select
-                    value={pSelectShift}
-                    onChange={(e) => setPSelectShift(e.target.value as any)}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-lg p-1.5 text-xs"
-                  >
-                    <option value="both">Ambos</option>
-                    <option value="1">1º Horário</option>
-                    <option value="2">2º Horário</option>
-                  </select>
+                {/* Guitarrista */}
+                <div className="bg-white p-3 rounded-xl border border-slate-150 flex flex-col sm:flex-row sm:items-center justify-between gap-2 shadow-3xs">
+                  <div className="flex-1">
+                    <label className="block text-[10px] font-extrabold uppercase text-indigo-700 mb-1">🎸 Guitarrista (Fixo)</label>
+                    <select
+                      value={slotGuitarrista.userId}
+                      onChange={(e) => setSlotGuitarrista({ ...slotGuitarrista, userId: e.target.value })}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-lg p-1.5 text-xs font-medium focus:bg-white focus:ring-1 focus:ring-indigo-500"
+                    >
+                      <option value="">(Vazio - Sem Guitarrista)</option>
+                      {users.filter(u => u.roles.some(r => r.toLowerCase().includes('guit') || r.toLowerCase().includes('violã') || r.toLowerCase().includes('violao'))).map(u => (
+                        <option key={u.id} value={u.id}>{u.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="w-full sm:w-[110px] shrink-0">
+                    <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1">Turno</label>
+                    <select
+                      value={slotGuitarrista.shift}
+                      onChange={(e) => setSlotGuitarrista({ ...slotGuitarrista, shift: e.target.value as any })}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-lg p-1.5 text-xs text-slate-600"
+                    >
+                      <option value="both">Ambos</option>
+                      <option value="1">1º Horário</option>
+                      <option value="2">2º Horário</option>
+                    </select>
+                  </div>
                 </div>
 
-                <div className="sm:col-span-1">
+                {/* Baixista */}
+                <div className="bg-white p-3 rounded-xl border border-slate-150 flex flex-col sm:flex-row sm:items-center justify-between gap-2 shadow-3xs">
+                  <div className="flex-1">
+                    <label className="block text-[10px] font-extrabold uppercase text-indigo-700 mb-1">🎻 Baixista (Fixo)</label>
+                    <select
+                      value={slotBaixista.userId}
+                      onChange={(e) => setSlotBaixista({ ...slotBaixista, userId: e.target.value })}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-lg p-1.5 text-xs font-medium focus:bg-white focus:ring-1 focus:ring-indigo-500"
+                    >
+                      <option value="">(Vazio - Sem Baixista)</option>
+                      {users.filter(u => u.roles.some(r => r.toLowerCase().includes('baix'))).map(u => (
+                        <option key={u.id} value={u.id}>{u.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="w-full sm:w-[110px] shrink-0">
+                    <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1">Turno</label>
+                    <select
+                      value={slotBaixista.shift}
+                      onChange={(e) => setSlotBaixista({ ...slotBaixista, shift: e.target.value as any })}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-lg p-1.5 text-xs text-slate-600"
+                    >
+                      <option value="both">Ambos</option>
+                      <option value="1">1º Horário</option>
+                      <option value="2">2º Horário</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Cantor 1 */}
+                <div className="bg-white p-3 rounded-xl border border-slate-150 flex flex-col sm:flex-row sm:items-center justify-between gap-2 shadow-3xs">
+                  <div className="flex-1">
+                    <label className="block text-[10px] font-extrabold uppercase text-indigo-700 mb-1">🎤 Cantor 1 (Fixo)</label>
+                    <select
+                      value={slotCantor1.userId}
+                      onChange={(e) => setSlotCantor1({ ...slotCantor1, userId: e.target.value })}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-lg p-1.5 text-xs font-medium focus:bg-white focus:ring-1 focus:ring-indigo-500"
+                    >
+                      <option value="">(Vazio - Sem Cantor 1)</option>
+                      {users.filter(u => u.roles.some(r => r.toLowerCase().includes('voz') || r.toLowerCase().includes('voc') || r.toLowerCase().includes('back') || r.toLowerCase().includes('cant') || r.toLowerCase().includes('ministr'))).map(u => (
+                        <option key={u.id} value={u.id}>{u.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="w-full sm:w-[110px] shrink-0">
+                    <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1">Turno</label>
+                    <select
+                      value={slotCantor1.shift}
+                      onChange={(e) => setSlotCantor1({ ...slotCantor1, shift: e.target.value as any })}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-lg p-1.5 text-xs text-slate-600"
+                    >
+                      <option value="both">Ambos</option>
+                      <option value="1">1º Horário</option>
+                      <option value="2">2º Horário</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Cantor 2 */}
+                <div className="bg-white p-3 rounded-xl border border-slate-150 flex flex-col sm:flex-row sm:items-center justify-between gap-2 shadow-3xs">
+                  <div className="flex-1">
+                    <label className="block text-[10px] font-extrabold uppercase text-indigo-700 mb-1">🎤 Cantor 2 (Fixo)</label>
+                    <select
+                      value={slotCantor2.userId}
+                      onChange={(e) => setSlotCantor2({ ...slotCantor2, userId: e.target.value })}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-lg p-1.5 text-xs font-medium focus:bg-white focus:ring-1 focus:ring-indigo-500"
+                    >
+                      <option value="">(Vazio - Sem Cantor 2)</option>
+                      {users.filter(u => u.roles.some(r => r.toLowerCase().includes('voz') || r.toLowerCase().includes('voc') || r.toLowerCase().includes('back') || r.toLowerCase().includes('cant') || r.toLowerCase().includes('ministr'))).map(u => (
+                        <option key={u.id} value={u.id}>{u.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="w-full sm:w-[110px] shrink-0">
+                    <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1">Turno</label>
+                    <select
+                      value={slotCantor2.shift}
+                      onChange={(e) => setSlotCantor2({ ...slotCantor2, shift: e.target.value as any })}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-lg p-1.5 text-xs text-slate-600"
+                    >
+                      <option value="both">Ambos</option>
+                      <option value="1">1º Horário</option>
+                      <option value="2">2º Horário</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Cantor 3 */}
+                <div className="bg-white p-3 rounded-xl border border-slate-150 flex flex-col sm:flex-row sm:items-center justify-between gap-2 shadow-3xs text-slate-850">
+                  <div className="flex-1">
+                    <label className="block text-[10px] font-extrabold uppercase text-indigo-700 mb-1">🎤 Cantor 3 (Fixo)</label>
+                    <select
+                      value={slotCantor3.userId}
+                      onChange={(e) => setSlotCantor3({ ...slotCantor3, userId: e.target.value })}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-lg p-1.5 text-xs font-medium focus:bg-white focus:ring-1 focus:ring-indigo-500"
+                    >
+                      <option value="">(Vazio - Sem Cantor 3)</option>
+                      {users.filter(u => u.roles.some(r => r.toLowerCase().includes('voz') || r.toLowerCase().includes('voc') || r.toLowerCase().includes('back') || r.toLowerCase().includes('cant') || r.toLowerCase().includes('ministr'))).map(u => (
+                        <option key={u.id} value={u.id}>{u.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="w-full sm:w-[110px] shrink-0">
+                    <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1">Turno</label>
+                    <select
+                      value={slotCantor3.shift}
+                      onChange={(e) => setSlotCantor3({ ...slotCantor3, shift: e.target.value as any })}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-lg p-1.5 text-xs text-slate-600"
+                    >
+                      <option value="both">Ambos</option>
+                      <option value="1">1º Horário</option>
+                      <option value="2">2º Horário</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Violão */}
+                <div className="bg-white p-3 rounded-xl border border-slate-150 flex flex-col sm:flex-row sm:items-center justify-between gap-2 shadow-3xs text-slate-850">
+                  <div className="flex-1">
+                    <label className="block text-[10px] font-extrabold uppercase text-indigo-700 mb-1">🎸 Violão (Fixo)</label>
+                    <select
+                      value={slotViolao.userId}
+                      onChange={(e) => setSlotViolao({ ...slotViolao, userId: e.target.value })}
+                      className="w-full bg-slate-50 border border-slate-150 rounded-lg p-1.5 text-xs font-medium focus:bg-white focus:ring-1 focus:ring-indigo-500"
+                    >
+                      <option value="">(Vazio - Sem Violão)</option>
+                      {users.filter(u => u.roles.some(r => r.toLowerCase().includes('viol') || r.toLowerCase().includes('guit') || r.toLowerCase().includes('violão'))).map(u => (
+                        <option key={u.id} value={u.id}>{u.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="w-full sm:w-[110px] shrink-0">
+                    <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1">Turno</label>
+                    <select
+                      value={slotViolao.shift}
+                      onChange={(e) => setSlotViolao({ ...slotViolao, shift: e.target.value as any })}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-lg p-1.5 text-xs text-slate-600"
+                    >
+                      <option value="both">Ambos</option>
+                      <option value="1">1º Horário</option>
+                      <option value="2">2º Horário</option>
+                    </select>
+                  </div>
+                </div>
+
+              </div>
+
+              {/* Botões de vinculação em lote */}
+              <div className="mt-4 pt-4 border-t border-indigo-100/60 flex flex-col sm:flex-row items-center justify-between gap-4 bg-white/75 p-3 rounded-xl border border-slate-200/60">
+                <div className="text-left space-y-0.5">
+                  <h6 className="text-[11px] font-extrabold text-indigo-950 uppercase tracking-wider flex items-center gap-1">⚡ Vincular Integrantes por Turno</h6>
+                  <p className="text-[10px] text-slate-500 leading-normal">
+                    Preencheu o time de cima? Escolha o turno abaixo para vinculá-los todos de uma só vez à lista da escala e liberar os slots para preencher o próximo turno!
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-2 shrink-0 justify-end w-full sm:w-auto">
                   <button
                     type="button"
-                    onClick={addParticipantToCreatorList}
-                    className="w-full bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg p-1.5 text-xs font-bold transition flex justify-center cursor-pointer"
+                    onClick={() => batchLinkSlotsToShift('1')}
+                    className="flex-1 sm:flex-none px-3.5 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold rounded-lg text-xs border border-indigo-200/80 transition cursor-pointer"
                   >
-                    +
+                    Vincular ao 1º Horário
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => batchLinkSlotsToShift('2')}
+                    className="flex-1 sm:flex-none px-3.5 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold rounded-lg text-xs border border-indigo-200/80 transition cursor-pointer"
+                  >
+                    Vincular ao 2º Horário
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => batchLinkSlotsToShift('both')}
+                    className="flex-1 sm:flex-none px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg text-xs shadow-xs transition cursor-pointer"
+                  >
+                    Vincular a Ambos
                   </button>
                 </div>
               </div>
 
-              {/* Allocated list */}
-              {creatorParticipants.length === 0 ? (
-                <div className="text-center py-2 text-[11px] text-slate-400 italic">Nenhum ministro adicionado ao culto. Monte o time acima!</div>
-              ) : (
-                <div className="flex flex-wrap gap-2 pt-1">
-                  {creatorParticipants.map(partCell => (
-                    <div key={partCell.userId} className="flex items-center gap-1.5 py-1 px-2.5 bg-white border border-slate-150 rounded-xl shadow-xs">
-                      <img 
-                        src={partCell.avatarUrl} 
-                        alt={partCell.name} 
-                        className="h-5 w-5 rounded-md bg-slate-100"
-                        referrerPolicy="no-referrer"
-                      />
-                      <div className="text-[10px]">
-                        <strong className="text-slate-800">{partCell.name}</strong> 
-                        <span className="text-slate-400 mx-1">•</span> 
-                        <span className="text-indigo-600">{partCell.role}</span>
-                        <span className="bg-slate-100 text-slate-600 px-1 rounded ml-1.5 font-mono text-[9px]">
-                          {partCell.shift === 'both' ? 'Culto Geral' : `${partCell.shift}º Horário`}
-                        </span>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => removeParticipantFromCreatorList(partCell.userId)}
-                        className="text-slate-400 hover:text-red-500 transition p-0.5 ml-1 cursor-pointer"
-                      >
-                        &times;
-                      </button>
-                    </div>
-                  ))}
+              {/* Extra selections block */}
+              <div className="border border-dashed border-indigo-200 p-3.5 bg-white rounded-xl space-y-3">
+                <label className="block text-[10px] font-extrabold uppercase text-indigo-950">🪄 Caso precise de mais integrantes (Seleção Extra)</label>
+                <div className="grid grid-cols-1 sm:grid-cols-12 gap-2 items-end">
+                  <div className="sm:col-span-5">
+                    <label className="block text-[9px] font-bold uppercase text-slate-500 mb-1">Membro Extra</label>
+                    <select
+                      value={pSelectUser}
+                      onChange={(e) => setPSelectUser(e.target.value)}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-lg p-1.5 text-xs focus:bg-white"
+                    >
+                      <option value="">Escolher qualquer integrante...</option>
+                      {users.map(u => (
+                        <option key={u.id} value={u.id}>{u.name}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="sm:col-span-4">
+                    <label className="block text-[9px] font-bold uppercase text-slate-500 mb-1">Atuação / Instrumento</label>
+                    <input
+                      type="text"
+                      placeholder="Ex: Violão, Flauta, Sax, Backing..."
+                      value={pSelectRole}
+                      onChange={(e) => setPSelectRole(e.target.value)}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-lg p-1.5 text-xs focus:bg-white"
+                    />
+                  </div>
+
+                  <div className="sm:col-span-2">
+                    <label className="block text-[9px] font-bold uppercase text-slate-500 mb-1">Turno de Serviço</label>
+                    <select
+                      value={pSelectShift}
+                      onChange={(e) => setPSelectShift(e.target.value as any)}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-lg p-1.5 text-xs"
+                    >
+                      <option value="both">Ambos</option>
+                      <option value="1">1º Horário</option>
+                      <option value="2">2º Horário</option>
+                    </select>
+                  </div>
+
+                  <div className="sm:col-span-1">
+                    <button
+                      type="button"
+                      onClick={addExtraParticipantToCreatorList}
+                      className="w-full bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg p-1.5 text-xs font-bold transition flex items-center justify-center cursor-pointer h-[34px]"
+                    >
+                      +
+                    </button>
+                  </div>
                 </div>
-              )}
+
+                {/* Listed extras */}
+                {creatorExtraParticipants.length > 0 && (
+                  <div className="flex flex-wrap gap-2 pt-2 border-t border-slate-100">
+                    {creatorExtraParticipants.map(partCell => (
+                      <div key={partCell.userId} className="flex items-center gap-1.5 py-1 px-2.5 bg-slate-50 border border-slate-200 rounded-xl shadow-3xs">
+                        <img 
+                          src={partCell.avatarUrl} 
+                          alt={partCell.name} 
+                          className="h-4.5 w-4.5 rounded bg-slate-100"
+                          referrerPolicy="no-referrer"
+                        />
+                        <div className="text-[10px]">
+                          <strong className="text-slate-800">{partCell.name}</strong> 
+                          <span className="text-slate-400 mx-1">•</span> 
+                          <span className="text-indigo-600 font-semibold">{partCell.role}</span>
+                          <span className="bg-slate-250 text-slate-700 px-1 rounded ml-1 text-[9px] font-mono">
+                            {partCell.shift === 'both' ? 'Geral' : `${partCell.shift}º Hor`}
+                          </span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => removeExtraParticipantFromCreatorList(partCell.userId)}
+                          className="text-slate-400 hover:text-red-500 transition p-0.5 ml-1 cursor-pointer font-bold"
+                        >
+                          &times;
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Scale Publish selection actions */}
@@ -741,10 +1177,7 @@ export default function ScalesTab({
                         <img
                           src={part.avatarUrl}
                           alt={part.name}
-                          className={`h-6 w-6 rounded-full bg-slate-100 border p-0.5 ${
-                            part.status === 'confirmed' ? 'border-emerald-400 bg-emerald-50' : 
-                            part.status === 'declined' ? 'border-red-400 bg-red-50' : 'border-amber-400'
-                          }`}
+                          className="h-6 w-6 rounded-full bg-indigo-50 border border-slate-200 p-0.5"
                           referrerPolicy="no-referrer"
                         />
                       </div>
@@ -755,18 +1188,6 @@ export default function ScalesTab({
                       </span>
                     )}
                   </div>
-
-                  {/* Immediate confirmation indicator stamps */}
-                  {myStatusText && (
-                    <span className={`text-[10px] font-sans font-bold flex items-center gap-1 ${
-                      myStatusText === 'confirmed' ? 'text-emerald-700' :
-                      myStatusText === 'declined' ? 'text-red-700' :
-                      'text-amber-700 animate-pulse'
-                    }`}>
-                      {myStatusText === 'confirmed' ? '✓ Escalado & Confirmado' :
-                       myStatusText === 'declined' ? '✗ Ausente neste Culto' : '● Aguardando Resposta'}
-                    </span>
-                  )}
                 </div>
 
                 {/* Líder Action buttons on card */}
@@ -1040,17 +1461,10 @@ export default function ScalesTab({
                                     referrerPolicy="no-referrer"
                                   />
                                   <div>
-                                    <h6 className="text-[10px] font-bold text-slate-900 truncate max-w-[100px]">{cell.name}</h6>
-                                    <span className="text-[8px] text-slate-500 block truncate max-w-[100px]">{cell.role}</span>
+                                    <h6 className="text-[10px] font-bold text-slate-900 truncate max-w-[150px]">{cell.name}</h6>
+                                    <span className="text-[8px] text-slate-500 block truncate max-w-[150px]">{cell.role}</span>
                                   </div>
                                 </div>
-                                <span className={`text-[8px] font-bold uppercase px-1 py-0.5 rounded ${
-                                  cell.status === 'confirmed' ? 'bg-emerald-100 text-emerald-850' :
-                                  cell.status === 'declined' ? 'bg-red-100 text-red-850' :
-                                  'bg-amber-100 text-amber-800'
-                                }`}>
-                                  {cell.status === 'confirmed' ? 'Ok' : cell.status === 'declined' ? 'Ausente' : 'Pendente'}
-                                </span>
                               </div>
                             ))}
                           </div>
@@ -1076,17 +1490,10 @@ export default function ScalesTab({
                                     referrerPolicy="no-referrer"
                                   />
                                   <div>
-                                    <h6 className="text-[10px] font-bold text-slate-900 truncate max-w-[100px]">{cell.name}</h6>
-                                    <span className="text-[8px] text-slate-500 block truncate max-w-[100px]">{cell.role}</span>
+                                    <h6 className="text-[10px] font-bold text-slate-900 truncate max-w-[150px]">{cell.name}</h6>
+                                    <span className="text-[8px] text-slate-500 block truncate max-w-[150px]">{cell.role}</span>
                                   </div>
                                 </div>
-                                <span className={`text-[8px] font-bold uppercase px-1 py-0.5 rounded ${
-                                  cell.status === 'confirmed' ? 'bg-emerald-100 text-emerald-850' :
-                                  cell.status === 'declined' ? 'bg-red-100 text-red-850' :
-                                  'bg-amber-100 text-amber-800'
-                                }`}>
-                                  {cell.status === 'confirmed' ? 'Ok' : cell.status === 'declined' ? 'Ausente' : 'Pendente'}
-                                </span>
                               </div>
                             ))}
                           </div>
@@ -1103,64 +1510,9 @@ export default function ScalesTab({
               {/* Personal Active User response actions inside Modal */}
               <div className="mt-5 pt-3.5 border-t border-slate-150 flex flex-col sm:flex-row gap-3.5 justify-between items-center bg-slate-50 -mx-6 -mb-6 p-5 rounded-b-3xl">
                 
-                {/* Check if active user is portion of scale */}
-                {(() => {
-                  const myParticipant = inspectedScale.participants.find(p => p.userId === currentUser.id);
-                  if (!myParticipant) {
-                    return <p className="text-[11px] text-slate-500 italic">Você não foi pré-escalado nesta liturgia.</p>;
-                  }
-
-                  if (myParticipant.status === 'pending') {
-                    return (
-                      <div className="flex flex-col sm:flex-row gap-2 w-full justify-between items-center">
-                        <span className="text-xs text-indigo-950 font-bold">Confirme sua escala neste culto:</span>
-                        <div className="flex gap-2 w-full sm:w-auto shrink-0">
-                          <button
-                            onClick={() => respondImmediateToInspected('declined')}
-                            className="flex-1 sm:flex-none px-3.5 py-1.5 border border-red-200 bg-red-50 text-red-700 font-semibold rounded-lg text-xs hover:bg-red-100 transition cursor-pointer"
-                          >
-                            Recusar
-                          </button>
-                          <button
-                            onClick={() => respondImmediateToInspected('confirmed')}
-                            className="flex-1 sm:flex-none px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg text-xs shadow-xs transition cursor-pointer"
-                          >
-                            Confirmar Presença (Estou Pronto)
-                          </button>
-                        </div>
-                      </div>
-                    );
-                  }
-
-                  return (
-                    <div className="flex flex-col sm:flex-row gap-3 w-full justify-between items-center bg-slate-100/50 p-2.5 rounded-2xl border border-slate-250/30">
-                      <div className="flex items-center gap-1.5">
-                        <span className={`text-xs font-bold ${myParticipant.status === 'confirmed' ? 'text-emerald-700' : 'text-red-700'}`}>
-                          {myParticipant.status === 'confirmed' 
-                            ? '✓ Você confirmou presença neste culto!' 
-                            : '✗ Você marcou ausência neste culto.'}
-                        </span>
-                      </div>
-                      <div className="flex gap-2 w-full sm:w-auto shrink-0">
-                        {myParticipant.status === 'confirmed' ? (
-                          <button
-                            onClick={() => respondImmediateToInspected('declined')}
-                            className="flex-1 sm:flex-none px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 font-semibold rounded-lg text-xs transition cursor-pointer"
-                          >
-                            Mudar para Ausente
-                          </button>
-                        ) : (
-                          <button
-                            onClick={() => respondImmediateToInspected('confirmed')}
-                            className="flex-1 sm:flex-none px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg text-xs transition cursor-pointer"
-                          >
-                            Mudar para Presente
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })()}
+                <div className="text-[11px] text-slate-500 italic max-w-sm sm:max-w-md leading-normal">
+                  ℹ️ Não é necessário confirmar presença por aqui. Caso de imprevisto ou impossibilidade, por favor publique uma mensagem no <strong>Mural de Recados</strong> para avisar aos líderes e permitir sua substituição imediata.
+                </div>
 
                 {/* Administrative and Export parameters */}
                 {(currentUser.role === 'Líder' || currentUser.isAdmin) && (
@@ -1344,17 +1696,10 @@ export default function ScalesTab({
                               {getInitials(cell.name)}
                             </div>
                             <div className="leading-tight">
-                              <h6 className="text-[10px] font-extrabold text-slate-900 truncate max-w-[80px]">{cell.name}</h6>
-                              <span className="text-[8px] text-slate-500 block truncate max-w-[80px]">{cell.role}</span>
+                              <h6 className="text-[10px] font-extrabold text-slate-900 truncate max-w-[120px]">{cell.name}</h6>
+                              <span className="text-[8px] text-slate-500 block truncate max-w-[120px]">{cell.role}</span>
                             </div>
                           </div>
-                          <span className={`text-[8px] font-bold uppercase px-1 py-0.5 rounded leading-none ${
-                            cell.status === 'confirmed' ? 'bg-emerald-100 text-emerald-800' :
-                            cell.status === 'declined' ? 'bg-red-100 text-red-800' :
-                            'bg-amber-100 text-amber-800'
-                          }`}>
-                            {cell.status === 'confirmed' ? 'Confirmado' : cell.status === 'declined' ? 'Ausente' : 'Pendente'}
-                          </span>
                         </div>
                       ))}
                     </div>
@@ -1377,17 +1722,10 @@ export default function ScalesTab({
                               {getInitials(cell.name)}
                             </div>
                             <div className="leading-tight">
-                              <h6 className="text-[10px] font-extrabold text-slate-900 truncate max-w-[80px]">{cell.name}</h6>
-                              <span className="text-[8px] text-slate-500 block truncate max-w-[80px]">{cell.role}</span>
+                              <h6 className="text-[10px] font-extrabold text-slate-900 truncate max-w-[120px]">{cell.name}</h6>
+                              <span className="text-[8px] text-slate-500 block truncate max-w-[120px]">{cell.role}</span>
                             </div>
                           </div>
-                          <span className={`text-[8px] font-bold uppercase px-1 py-0.5 rounded leading-none ${
-                            cell.status === 'confirmed' ? 'bg-emerald-100 text-emerald-800' :
-                            cell.status === 'declined' ? 'bg-red-100 text-red-800' :
-                            'bg-amber-100 text-amber-800'
-                          }`}>
-                            {cell.status === 'confirmed' ? 'Confirmado' : cell.status === 'declined' ? 'Ausente' : 'Pendente'}
-                          </span>
                         </div>
                       ))}
                     </div>
