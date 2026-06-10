@@ -36,6 +36,18 @@ export default function ScalesTab({
   // Selection scale for Detailed Modal
   const [inspectedScale, setInspectedScale] = useState<Scale | null>(null);
 
+  // Keep inspectedScale in sync with latest scales prop
+  React.useEffect(() => {
+    if (inspectedScale) {
+      const latestScale = scales.find(s => s.id === inspectedScale.id);
+      if (latestScale) {
+        setInspectedScale(latestScale);
+      } else {
+        setInspectedScale(null);
+      }
+    }
+  }, [scales, inspectedScale?.id]);
+
   // Form Creation Scale States
   const [isCreatingScale, setIsCreatingScale] = useState(false);
   const [editingScaleId, setEditingScaleId] = useState<string | null>(null);
@@ -1055,27 +1067,63 @@ export default function ScalesTab({
               <div className="mt-5 pt-3.5 border-t border-slate-150 flex flex-col sm:flex-row gap-3.5 justify-between items-center bg-slate-50 -mx-6 -mb-6 p-5 rounded-b-3xl">
                 
                 {/* Check if active user is portion of scale */}
-                {inspectedScale.participants.some(p => p.userId === currentUser.id) ? (
-                  <div className="flex flex-col sm:flex-row gap-2 w-full justify-between items-center">
-                    <span className="text-xs text-indigo-950 font-bold">Confirme seu apoio à distância:</span>
-                    <div className="flex gap-2 w-full sm:w-auto shrink-0">
-                      <button
-                        onClick={() => respondImmediateToInspected('declined')}
-                        className="flex-1 sm:flex-none px-3.5 py-1.5 border border-red-200 bg-red-50 text-red-700 font-semibold rounded-lg text-xs hover:bg-red-100 transition cursor-pointer"
-                      >
-                        Recusar
-                      </button>
-                      <button
-                        onClick={() => respondImmediateToInspected('confirmed')}
-                        className="flex-1 sm:flex-none px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg text-xs shadow-xs transition cursor-pointer"
-                      >
-                        Confirmar Presença (Estou Pronto)
-                      </button>
+                {(() => {
+                  const myParticipant = inspectedScale.participants.find(p => p.userId === currentUser.id);
+                  if (!myParticipant) {
+                    return <p className="text-[11px] text-slate-500 italic">Você não foi pré-escalado nesta liturgia.</p>;
+                  }
+
+                  if (myParticipant.status === 'pending') {
+                    return (
+                      <div className="flex flex-col sm:flex-row gap-2 w-full justify-between items-center">
+                        <span className="text-xs text-indigo-950 font-bold">Confirme sua escala neste culto:</span>
+                        <div className="flex gap-2 w-full sm:w-auto shrink-0">
+                          <button
+                            onClick={() => respondImmediateToInspected('declined')}
+                            className="flex-1 sm:flex-none px-3.5 py-1.5 border border-red-200 bg-red-50 text-red-700 font-semibold rounded-lg text-xs hover:bg-red-100 transition cursor-pointer"
+                          >
+                            Recusar
+                          </button>
+                          <button
+                            onClick={() => respondImmediateToInspected('confirmed')}
+                            className="flex-1 sm:flex-none px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg text-xs shadow-xs transition cursor-pointer"
+                          >
+                            Confirmar Presença (Estou Pronto)
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <div className="flex flex-col sm:flex-row gap-3 w-full justify-between items-center bg-slate-100/50 p-2.5 rounded-2xl border border-slate-250/30">
+                      <div className="flex items-center gap-1.5">
+                        <span className={`text-xs font-bold ${myParticipant.status === 'confirmed' ? 'text-emerald-700' : 'text-red-700'}`}>
+                          {myParticipant.status === 'confirmed' 
+                            ? '✓ Você confirmou presença neste culto!' 
+                            : '✗ Você marcou ausência neste culto.'}
+                        </span>
+                      </div>
+                      <div className="flex gap-2 w-full sm:w-auto shrink-0">
+                        {myParticipant.status === 'confirmed' ? (
+                          <button
+                            onClick={() => respondImmediateToInspected('declined')}
+                            className="flex-1 sm:flex-none px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 font-semibold rounded-lg text-xs transition cursor-pointer"
+                          >
+                            Mudar para Ausente
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => respondImmediateToInspected('confirmed')}
+                            className="flex-1 sm:flex-none px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg text-xs transition cursor-pointer"
+                          >
+                            Mudar para Presente
+                          </button>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                ) : (
-                  <p className="text-[11px] text-slate-500 italic">Você não foi pré-escalado nesta liturgia.</p>
-                )}
+                  );
+                })()}
 
                 {/* Administrative parameters */}
                 {currentUser.isAdmin && (
